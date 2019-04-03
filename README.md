@@ -18,8 +18,4 @@ composer require dionchaika/db:dev-master
 <?php
 
 require_once 'vendor/autoload.php';
-
-/* use Dionchaika\Db\Db;
-
-$db = new Db; */
 ```
