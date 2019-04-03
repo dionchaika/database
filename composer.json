@@ -1,0 +1,24 @@
+{
+    "name": "dionchaika/db",
+    "description": "The PHP MySQL Library",
+    "keywords": ["php", "mysql", "db", "database"],
+    "homepage": "https://github.com/dionchaika/db",
+    "version": "v1.0.0",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dion Chaika",
+            "email": "dionchaika@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Dionchaika\\Db\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7.0",
+        "ext-mysqli": "*"
+    }
+}
