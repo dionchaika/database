@@ -4,17 +4,17 @@ The PHP MySQL Library
 ## Requirements
 
 1. PHP 7.0
-2. MySQLi extention
+2. MySQL PHP extention
 
 ## Installation
 
-Install The PHP MySQL Library via [composer](https://getcomposer.org/).
+Install the PHP MySQL library via [composer](https://getcomposer.org/):
 
 ```bash
 composer require dionchaika/db:dev-master
 ```
 
-Then require the autoloader.
+After installing, you will need to require Composer's autoloader:
 
 ```php
 require_once 'vendor/autoload.php';
