@@ -28,6 +28,20 @@ class Select extends Query
     protected $table;
 
     /**
+     * The selection order.
+     *
+     * @var string|null
+     */
+    protected $order;
+
+    /**
+     * The selection condition.
+     *
+     * @var string|null
+     */
+    protected $condition;
+
+    /**
      * @param array|mixed $rows
      */
     public function __construct($rows)
@@ -52,6 +66,17 @@ class Select extends Query
     {
         $this->table = $this->normalizeName($table);
         return $this;
+    }
+
+    /**
+     * Set a selection condition.
+     *
+     * @param array|mixed $condition
+     * @return \Dionchaika\Db\Query\Select
+     */
+    public function where($condition): Select
+    {
+        
     }
 
     /**
