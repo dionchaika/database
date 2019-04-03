@@ -13,5 +13,14 @@ namespace Dionchaika\Db\Query;
 
 class Query
 {
-    
+    /**
+     * Normalize a query name.
+     *
+     * @param string $name
+     * @return string
+     */
+    protected function normalizeName(string $name): string
+    {
+        return '`'.trim($name).'`';
+    }
 }
