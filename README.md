@@ -14,7 +14,7 @@ Install the PHP MySQL library via [composer](https://getcomposer.org/):
 composer require dionchaika/db:dev-master
 ```
 
-After installing, you will need to require Composer's autoloader:
+After installing, you will need to require the autoloader:
 
 ```php
 require_once 'vendor/autoload.php';
