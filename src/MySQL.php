@@ -16,42 +16,42 @@ use Exception;
 class MySQL
 {
     /**
-     * The database user.
+     * The MySQL database user.
      *
      * @var string
      */
     protected $user;
 
     /**
-     * The database password.
+     * The MySQL database password.
      *
      * @var string
      */
     protected $password;
 
     /**
-     * The database host.
+     * The MySQL database host.
      *
      * @var string
      */
     protected $host;
 
     /**
-     * The database name.
+     * The MySQL database name.
      *
      * @var string
      */
     protected $name;
 
     /**
-     * The database charset.
+     * The MySQL database charset.
      *
      * @var string
      */
     protected $charset;
 
     /**
-     * The database connection.
+     * The MySQL database connection.
      *
      * @var mixed|null
      */
@@ -101,7 +101,7 @@ class MySQL
     }
 
     /**
-     * Set the database user.
+     * Set the MySQL database user.
      *
      * @param string $user
      * @return \Dionchaika\Db\MySQL
@@ -113,7 +113,7 @@ class MySQL
     }
 
     /**
-     * Set the database password.
+     * Set the MySQL database password.
      *
      * @param string $password
      * @return \Dionchaika\Db\MySQL
@@ -125,7 +125,7 @@ class MySQL
     }
 
     /**
-     * Set the database host.
+     * Set the MySQL database host.
      *
      * @param string $host
      * @return \Dionchaika\Db\MySQL
@@ -137,7 +137,7 @@ class MySQL
     }
 
     /**
-     * Set the database name.
+     * Set the MySQL database name.
      *
      * @param string $name
      * @return \Dionchaika\Db\MySQL
@@ -149,7 +149,7 @@ class MySQL
     }
 
     /**
-     * Set the database charset.
+     * Set the MySQL database charset.
      *
      * @param string $charset
      * @return \Dionchaika\Db\MySQL
@@ -161,7 +161,7 @@ class MySQL
     }
 
     /**
-     * Set a database connection.
+     * Set a MySQL database connection.
      *
      * @param mixed $connection
      * @return \Dionchaika\Db\MySQL
@@ -173,7 +173,7 @@ class MySQL
     }
 
     /**
-     * Get the database connection.
+     * Get the MySQL database connection.
      *
      * @return mixed|null
      */
@@ -183,7 +183,7 @@ class MySQL
     }
 
     /**
-     * Connect to the database.
+     * Connect to the MySQL database.
      *
      * @return mixed
      * @throws \Exception
@@ -196,7 +196,7 @@ class MySQL
             $errorMessage = mysqli_connect_error();
 
             throw new Exception(
-                'Database connection error #'.$errorCode.': '.$errorMessage.'!'
+                'MySQL database connection error #'.$errorCode.': '.$errorMessage.'!'
             );
         }
 
@@ -205,7 +205,7 @@ class MySQL
             $errorMessage = mysqli_error($conn);
 
             throw new Exception(
-                'Database set charset error #'.$errorCode.': '.$errorMessage.'!'
+                'MySQL database set charset error #'.$errorCode.': '.$errorMessage.'!'
             );
         }
 
@@ -213,7 +213,7 @@ class MySQL
     }
 
     /**
-     * Disconnect from the database.
+     * Disconnect from the MySQL database.
      *
      * @return void
      * @throws \Exception
@@ -225,7 +225,7 @@ class MySQL
             $errorMessage = mysqli_error($this->conn);
 
             throw new Exception(
-                'Database disconnection error #'.$errorCode.': '.$errorMessage.'!'
+                'MySQL database disconnection error #'.$errorCode.': '.$errorMessage.'!'
             );
         };
 
@@ -273,7 +273,7 @@ class MySQL
             $errorMessage = mysqli_error($this->conn);
 
             throw new Exception(
-                'Database query error #'.$errorCode.': '.$errorMessage.'!'
+                'MySQL database query error #'.$errorCode.': '.$errorMessage.'!'
             );
         }
 

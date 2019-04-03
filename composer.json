@@ -1,7 +1,7 @@
 {
     "name": "dionchaika/db",
     "description": "The PHP Database Library",
-    "keywords": ["php", "mysql", "pdo", "db", "database"],
+    "keywords": ["php", "mysql", "mysqli", "pdo", "db", "database"],
     "homepage": "https://github.com/dionchaika/db",
     "version": "v1.0.0",
     "type": "library",
