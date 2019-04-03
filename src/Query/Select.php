@@ -130,6 +130,66 @@ class Select extends Query
     }
 
     /**
+     * Set OR selection condition.
+     *
+     * @param array|mixed $condition
+     * @return \Dionchaika\Db\Query\Select
+     * @throws \InvalidArgumentException
+     */
+    public function or($condition): Select
+    {
+        if (null !== $this->condition) {
+            $this->condition .= ' OR ';
+        }
+
+        return $this->where(func_get_args());
+    }
+
+    /**
+     * Set OR selection condition.
+     *
+     * An alias method name to or.
+     *
+     * @param array|mixed $condition
+     * @return \Dionchaika\Db\Query\Select
+     * @throws \InvalidArgumentException
+     */
+    public function orWhere($condition): Select
+    {
+        return $this->or(func_get_args());
+    }
+
+    /**
+     * Set AND selection condition.
+     *
+     * @param array|mixed $condition
+     * @return \Dionchaika\Db\Query\Select
+     * @throws \InvalidArgumentException
+     */
+    public function and($condition): Select
+    {
+        if (null !== $this->condition) {
+            $this->condition .= ' AND ';
+        }
+
+        return $this->where(func_get_args());
+    }
+
+    /**
+     * Set AND selection condition.
+     *
+     * An alias method name to and.
+     *
+     * @param array|mixed $condition
+     * @return \Dionchaika\Db\Query\Select
+     * @throws \InvalidArgumentException
+     */
+    public function andWhere($condition): Select
+    {
+        return $this->or(func_get_args());
+    }
+
+    /**
      * Normalize a query name.
      *
      * @param string $name
