@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The PHP MySQL Library.
+ * The PHP Database Library.
  *
  * @package dionchaika/db
  * @version 1.0.0
@@ -13,7 +13,7 @@ namespace Dionchaika\Db;
 
 use Exception;
 
-class Connection
+class MySQL
 {
     /**
      * The database user.
@@ -67,9 +67,9 @@ class Connection
     /**
      * The SQL query result.
      *
-     * @var mixed
+     * @var mixed|bool|null
      */
-    protected $queryResult = false;
+    protected $queryResult;
 
     /**
      * @param string $user
@@ -104,9 +104,9 @@ class Connection
      * Set the database user.
      *
      * @param string $user
-     * @return \Dionchaika\Db\Connection
+     * @return \Dionchaika\Db\MySQL
      */
-    public function setUser(string $user): Connection
+    public function setUser(string $user): MySQL
     {
         $this->user = $user;
         return $this;
@@ -115,10 +115,10 @@ class Connection
     /**
      * Set the database password.
      *
-     * @param string $user
-     * @return \Dionchaika\Db\Connection
+     * @param string $password
+     * @return \Dionchaika\Db\MySQL
      */
-    public function setPassword(string $password): Connection
+    public function setPassword(string $password): MySQL
     {
         $this->password = $password;
         return $this;
@@ -127,10 +127,10 @@ class Connection
     /**
      * Set the database host.
      *
-     * @param string $user
-     * @return \Dionchaika\Db\Connection
+     * @param string $host
+     * @return \Dionchaika\Db\MySQL
      */
-    public function setHost(string $host): Connection
+    public function setHost(string $host): MySQL
     {
         $this->host = $host;
         return $this;
@@ -139,10 +139,10 @@ class Connection
     /**
      * Set the database name.
      *
-     * @param string $user
-     * @return \Dionchaika\Db\Connection
+     * @param string $name
+     * @return \Dionchaika\Db\MySQL
      */
-    public function setName(string $name): Connection
+    public function setName(string $name): MySQL
     {
         $this->name = $name;
         return $this;
@@ -151,10 +151,10 @@ class Connection
     /**
      * Set the database charset.
      *
-     * @param string $user
-     * @return \Dionchaika\Db\Connection
+     * @param string $charset
+     * @return \Dionchaika\Db\MySQL
      */
-    public function setCharset(string $charset): Connection
+    public function setCharset(string $charset): MySQL
     {
         $this->charset = $charset;
         return $this;
@@ -164,9 +164,9 @@ class Connection
      * Set a database connection.
      *
      * @param mixed $connection
-     * @return \Dionchaika\Db\Connection
+     * @return \Dionchaika\Db\MySQL
      */
-    public function setConnection($connection): Connection
+    public function setConnection($connection): MySQL
     {
         $this->conn = $connection;
         return $this;
@@ -243,13 +243,23 @@ class Connection
     }
 
     /**
+     * Get the SQL query result.
+     *
+     * @return mixed|bool|null
+     */
+    public function getQueryResult()
+    {
+        return $this->queryString;
+    }
+
+    /**
      * Perform an SQL query.
      *
      * @param string $query
-     * @return \Dionchaika\Db\Connection
+     * @return \Dionchaika\Db\MySQL
      * @throws \Exception
      */
-    public function query(string $query): Connection
+    public function query(string $query): MySQL
     {
         if (null === $this->conn) {
             $this->connect();

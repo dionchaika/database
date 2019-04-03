@@ -1,7 +1,7 @@
 {
     "name": "dionchaika/db",
-    "description": "The PHP MySQL Library",
-    "keywords": ["php", "mysql", "db", "database"],
+    "description": "The PHP Database Library",
+    "keywords": ["php", "mysql", "pdo", "db", "database"],
     "homepage": "https://github.com/dionchaika/db",
     "version": "v1.0.0",
     "type": "library",
@@ -19,6 +19,7 @@
     },
     "require": {
         "php": "^7.0",
+        "ext-pdo": "*",
         "ext-mysqli": "*"
     }
 }

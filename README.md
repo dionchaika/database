@@ -1,5 +1,5 @@
 # Db
-The PHP MySQL Library
+The PHP Database Library
 
 ## 1. Requirements
 
@@ -8,7 +8,7 @@ The PHP MySQL Library
 
 ## 2. Installation
 
-Install the PHP MySQL library via [composer](https://getcomposer.org/):
+Install the PHP database library via [composer](https://getcomposer.org/):
 
 ```bash
 composer require dionchaika/db:dev-master
