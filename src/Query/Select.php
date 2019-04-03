@@ -14,11 +14,18 @@ namespace Dionchaika\Db\Query;
 class Select extends Query
 {
     /**
-     * The selected rows string.
+     * The selecting rows.
      *
      * @var string
      */
     protected $rows;
+
+    /**
+     * The selecting table.
+     *
+     * @var string
+     */
+    protected $table;
 
     /**
      * @param array|mixed $rows
@@ -33,5 +40,28 @@ class Select extends Query
         }
 
         $this->rows = $rows;
+    }
+
+    /**
+     * Set a query table.
+     *
+     * @param string $table
+     * @return \Dionchaika\Db\Query\Select
+     */
+    public function from(string $table): Select
+    {
+        $this->table = $this->normalizeName($table);
+        return $this;
+    }
+
+    /**
+     * Normalize a query name.
+     *
+     * @param string $name
+     * @return string
+     */
+    protected function normalizeName(string $name): string
+    {
+        return '`'.trim($name).'`';
     }
 }
