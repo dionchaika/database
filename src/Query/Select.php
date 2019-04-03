@@ -11,6 +11,8 @@
 
 namespace Dionchaika\Db\Query;
 
+use InvalidArgumentException;
+
 class Select extends Query
 {
     /**
@@ -73,10 +75,48 @@ class Select extends Query
      *
      * @param array|mixed $condition
      * @return \Dionchaika\Db\Query\Select
+     * @throws \InvalidArgumentException
      */
     public function where($condition): Select
     {
-        
+        $condition = is_array($condition) ? $condition : func_get_args();
+        if (3 !== count($condition)) {
+            throw new InvalidArgumentException(
+                'Invalid selection condition!'
+                .'Selection condition must contain three parameters:'
+                .'first argument, operator string and a second argument.'
+            );
+        }
+
+        $firstArgument = is_numeric($condition[0])
+            ? (string)$condition[0]
+            : $this->normalizeName($condition[0]);
+
+        $operatorString = $condition[1];
+        if (
+            '=' !== $operatorString &&
+            '>' !== $operatorString &&
+            '<' !== $operatorString &&
+            '>=' !== $operatorString &&
+            '<=' !== $operatorString &&
+            '<>' !== $operatorString &&
+            'IN' !== $operatorString &&
+            'LIKE' !== $operatorString &&
+            'BETWEEN' !== $operatorString
+        ) {
+            throw new InvalidArgumentException(
+                'Invalid operator string!'
+                .'Valid operator strings: =, >, <, >=, <=, <>, IN, LIKE, BETWEEN.'
+            );
+        }
+
+        $secondArgument = is_numeric($condition[2])
+            ? (string)$condition[2]
+            : $this->normalizeName($condition[2]);
+
+        $this->condition = $firstArgument.' '.$operatorString.' '.$secondArgument;
+
+        return $this;
     }
 
     /**
