@@ -88,9 +88,14 @@ class Select extends Query
             );
         }
 
-        $firstArgument = is_numeric($condition[0])
-            ? (string)$condition[0]
-            : $this->normalizeName($condition[0]);
+        $firstArgument = $condition[0];
+        if (null === $firstArgument || 'null' === strtolower($firstArgument)) {
+            $firstArgument = 'NULL';
+        } else {
+            $firstArgument = is_numeric($firstArgument)
+                ? (string)$firstArgument
+                : $this->normalizeName($firstArgument);
+        }
 
         $operatorString = $condition[1];
         if (
@@ -110,9 +115,14 @@ class Select extends Query
             );
         }
 
-        $secondArgument = is_numeric($condition[2])
-            ? (string)$condition[2]
-            : $this->normalizeName($condition[2]);
+        $secondArgument = $condition[2];
+        if (null === $secondArgument || 'null' === strtolower($secondArgument)) {
+            $firstArgument = 'NULL';
+        } else {
+            $secondArgument = is_numeric($secondArgument)
+                ? (string)$secondArgument
+                : $this->normalizeName($secondArgument);
+        }
 
         $this->condition = $firstArgument.' '.$operatorString.' '.$secondArgument;
 
