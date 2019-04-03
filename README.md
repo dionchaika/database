@@ -1,12 +1,12 @@
 # Db
 The PHP MySQL Library
 
-## Requirements
+## 1. Requirements
 
 1. PHP 7.0
-2. MySQL PHP extention
+2. PHP MySQL extention
 
-## Installation
+## 2. Installation
 
 Install the PHP MySQL library via [composer](https://getcomposer.org/):
 
@@ -14,8 +14,12 @@ Install the PHP MySQL library via [composer](https://getcomposer.org/):
 composer require dionchaika/db:dev-master
 ```
 
-After installing, you will need to require the autoloader:
-
 ```php
+<?php
+
 require_once 'vendor/autoload.php';
+
+/* use Dionchaika\Db\Db;
+
+$db = new Db; */
 ```
