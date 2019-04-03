@@ -124,7 +124,7 @@ class Select
                 : $this->normalizeName($secondArgument);
         }
 
-        $this->condition = $firstArgument.' '.$operatorString.' '.$secondArgument;
+        $this->condition .= $firstArgument.' '.$operatorString.' '.$secondArgument;
 
         return $this;
     }
@@ -186,7 +186,7 @@ class Select
      */
     public function andWhere($condition): Select
     {
-        return $this->or(func_get_args());
+        return $this->and(func_get_args());
     }
 
     /**
