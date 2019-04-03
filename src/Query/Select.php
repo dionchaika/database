@@ -43,7 +43,7 @@ class Select extends Query
     }
 
     /**
-     * Set a query table.
+     * Set a selecting table.
      *
      * @param string $table
      * @return \Dionchaika\Db\Query\Select
