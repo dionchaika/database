@@ -13,7 +13,7 @@ namespace Dionchaika\Db\Query;
 
 use InvalidArgumentException;
 
-class Select extends Query
+class Select
 {
     /**
      * The selecting rows.
