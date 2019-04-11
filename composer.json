@@ -1,8 +1,8 @@
 {
-    "name": "dionchaika/db",
+    "name": "dionchaika/database",
     "description": "The PHP Database Library",
-    "keywords": ["php", "mysql", "mysqli", "pdo", "db", "database"],
-    "homepage": "https://github.com/dionchaika/db",
+    "keywords": ["php", "mysql", "mysqli", "pdo", "database"],
+    "homepage": "https://github.com/dionchaika/database",
     "version": "v1.0.0",
     "type": "library",
     "license": "MIT",
@@ -14,7 +14,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Dionchaika\\Db\\": "src/"
+            "Dionchaika\\Database\\": "src/"
         }
     },
     "require": {

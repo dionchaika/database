@@ -1,202 +1,252 @@
 <?php
 
-/**
- * The PHP Database Library.
- *
- * @package dionchaika/db
- * @version 1.0.0
- * @license MIT
- * @author Dion Chaika <dionchaika@gmail.com>
- */
+namespace Dionchaika\Database\Query;
 
-namespace Dionchaika\Db\Query;
-
-use InvalidArgumentException;
+use Dionchaika\Database\ConnectorInterface;
 
 class Select
 {
-    /**
-     * The selecting rows.
-     *
-     * @var string
-     */
-    protected $rows;
+    use QuoteTrait;
 
     /**
-     * The selecting table.
-     *
-     * @var string
+     * @var array
      */
-    protected $table;
+    protected $parts = [
+        'select' => null,
+        'distinct' => false,
+        'from' => null,
+        'orderBy' => null,
+        'limit' => null
+    ];
 
     /**
-     * The selection order.
-     *
-     * @var string|null
+     * @var Dionchaika\Database\ConnectorInterface
      */
-    protected $order;
+    protected $connector;
 
     /**
-     * The selection condition.
-     *
-     * @var string|null
+     * @param \Dionchaika\Database\Query\Raw|array|mixed $columns
      */
-    protected $condition;
-
-    /**
-     * @param array|mixed $rows
-     */
-    public function __construct($rows)
+    public function __construct($columnNames = null)
     {
-        if ('*' !== $rows) {
-            $rows = implode(', ', array_map(
-                ['static', 'normalizeName'],
-                is_array($rows) ? $rows : func_get_args()
-            ));
-        }
+        if (null !== $columnNames) {
+            if ($columnNames instanceof Raw) {
+                $this->parts['select'] = $columnNames;
+            } else {
+                $columnNames = is_array($columnNames)
+                    ? $columnNames
+                    : func_get_args();
 
-        $this->rows = $rows;
+                $this->parts['select'] = [];
+                foreach ($columnNames as $key => $value) {
+                    if (is_int($key)) {
+                        $this->parts['select'][] = $this->quoteName($value);
+                    } else {
+                        $this->parts['select'][]
+                            = $this->quoteName($key).' AS '.$this->quoteName($value);
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Set a selecting table.
-     *
-     * @param string $table
-     * @return \Dionchaika\Db\Query\Select
+     * @param \Dionchaika\Database\ConnectorInterface $connector
+     * @return $this
      */
-    public function from(string $table): Select
+    public function setConnector(ConnectorInterface $connector): Select
     {
-        $this->table = $this->normalizeName($table);
+        $this->connector = $connector;
         return $this;
     }
 
     /**
-     * Set a selection condition.
-     *
-     * @param array|mixed $condition
-     * @return \Dionchaika\Db\Query\Select
-     * @throws \InvalidArgumentException
+     * @return $this
      */
-    public function where($condition): Select
+    public function distinct(): Select
     {
-        $condition = is_array($condition) ? $condition : func_get_args();
-        if (3 !== count($condition)) {
-            throw new InvalidArgumentException(
-                'Invalid selection condition!'
-                .'Selection condition must contain three parameters:'
-                .'first argument, operator string and a second argument.'
-            );
-        }
+        $this->parts['distinct'] = true;
+        return $this;
+    }
 
-        $firstArgument = $condition[0];
-        if (null === $firstArgument || 'null' === strtolower($firstArgument)) {
-            $firstArgument = 'NULL';
+    /**
+     * @return $this
+     */
+    public function all(): Select
+    {
+        $this->parts['select'] = new Raw('*');
+        return $this;
+    }
+
+    /**
+     * @param \Dionchaika\Database\Query\Raw|mixed $columnName
+     * @param mixed|null $aliasName
+     * @param bool $distinct
+     * @return $this
+     */
+    public function min($columnName = '*', $aliasName = null, $distinct = false): Select
+    {
+        $min = $this->createAggregate('MIN', $columnName, $aliasName, $distinct);
+        if ($this->parts['select'] instanceof Raw) {
+            $this->parts['select']->append(', '.$min);
         } else {
-            $firstArgument = is_numeric($firstArgument)
-                ? (string)$firstArgument
-                : $this->normalizeName($firstArgument);
+            $this->parts['select'][] = $min;
         }
-
-        $operatorString = $condition[1];
-        if (
-            '=' !== $operatorString &&
-            '>' !== $operatorString &&
-            '<' !== $operatorString &&
-            '>=' !== $operatorString &&
-            '<=' !== $operatorString &&
-            '<>' !== $operatorString &&
-            'IN' !== $operatorString &&
-            'LIKE' !== $operatorString &&
-            'BETWEEN' !== $operatorString
-        ) {
-            throw new InvalidArgumentException(
-                'Invalid operator string!'
-                .'Valid operator strings: =, >, <, >=, <=, <>, IN, LIKE, BETWEEN.'
-            );
-        }
-
-        $secondArgument = $condition[2];
-        if (null === $secondArgument || 'null' === strtolower($secondArgument)) {
-            $firstArgument = 'NULL';
-        } else {
-            $secondArgument = is_numeric($secondArgument)
-                ? (string)$secondArgument
-                : $this->normalizeName($secondArgument);
-        }
-
-        $this->condition .= $firstArgument.' '.$operatorString.' '.$secondArgument;
 
         return $this;
     }
 
     /**
-     * Set OR selection condition.
-     *
-     * @param array|mixed $condition
-     * @return \Dionchaika\Db\Query\Select
-     * @throws \InvalidArgumentException
+     * @param \Dionchaika\Database\Query\Raw|mixed $columnName
+     * @param mixed|null $aliasName
+     * @param bool $distinct
+     * @return $this
      */
-    public function or($condition): Select
+    public function max($columnName = '*', $aliasName = null, $distinct = false): Select
     {
-        if (null !== $this->condition) {
-            $this->condition .= ' OR ';
+        $max = $this->createAggregate('MAX', $columnName, $aliasName, $distinct);
+        if ($this->parts['select'] instanceof Raw) {
+            $this->parts['select']->append(', '.$max);
+        } else {
+            $this->parts['select'][] = $max;
         }
 
-        return $this->where(func_get_args());
+        return $this;
     }
 
     /**
-     * Set OR selection condition.
-     *
-     * An alias method name to or.
-     *
-     * @param array|mixed $condition
-     * @return \Dionchaika\Db\Query\Select
-     * @throws \InvalidArgumentException
+     * @param \Dionchaika\Database\Query\Raw|mixed $columnName
+     * @param mixed|null $aliasName
+     * @param bool $distinct
+     * @return $this
      */
-    public function orWhere($condition): Select
+    public function avg($columnName = '*', $aliasName = null, $distinct = false): Select
     {
-        return $this->or(func_get_args());
-    }
-
-    /**
-     * Set AND selection condition.
-     *
-     * @param array|mixed $condition
-     * @return \Dionchaika\Db\Query\Select
-     * @throws \InvalidArgumentException
-     */
-    public function and($condition): Select
-    {
-        if (null !== $this->condition) {
-            $this->condition .= ' AND ';
+        $avg = $this->createAggregate('AVG', $columnName, $aliasName, $distinct);
+        if ($this->parts['select'] instanceof Raw) {
+            $this->parts['select']->append(', '.$avg);
+        } else {
+            $this->parts['select'][] = $avg;
         }
 
-        return $this->where(func_get_args());
+        return $this;
     }
 
     /**
-     * Set AND selection condition.
-     *
-     * An alias method name to and.
-     *
-     * @param array|mixed $condition
-     * @return \Dionchaika\Db\Query\Select
-     * @throws \InvalidArgumentException
+     * @param \Dionchaika\Database\Query\Raw|mixed $columnName
+     * @param mixed|null $aliasName
+     * @param bool $distinct
+     * @return $this
      */
-    public function andWhere($condition): Select
+    public function sum($columnName = '*', $aliasName = null, $distinct = false): Select
     {
-        return $this->and(func_get_args());
+        $sum = $this->createAggregate('SUM', $columnName, $aliasName, $distinct);
+        if ($this->parts['select'] instanceof Raw) {
+            $this->parts['select']->append(', '.$sum);
+        } else {
+            $this->parts['select'][] = $sum;
+        }
+
+        return $this;
     }
 
     /**
-     * Normalize a query name.
-     *
+     * @param \Dionchaika\Database\Query\Raw|mixed $columnName
+     * @param mixed|null $aliasName
+     * @param bool $distinct
+     * @return $this
+     */
+    public function count($columnName = '*', $aliasName = null, $distinct = false): Select
+    {
+        $count = $this->createAggregate('COUNT', $columnName, $aliasName, $distinct);
+        if ($this->parts['select'] instanceof Raw) {
+            $this->parts['select']->append(', '.$count);
+        } else {
+            $this->parts['select'][] = $count;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param \Dionchaika\Database\Query\Raw|mixed $tableName
+     * @param mixed|null $aliasName
+     * @return $this
+     */
+    public function from($tableName, $aliasName = null): Select
+    {
+        if ($tableName instanceof Raw) {
+            $this->parts['from'] = $tableName;
+        } else {
+            $this->parts['from'] = $this->quoteName($tableName);
+            if (null !== $aliasName) {
+                $this->parts['from'] .= ' AS '.$this->quoteName($aliasName);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @param string $name
+     * @param \Dionchaika\Database\Query\Raw|mixed $columnName
+     * @param mixed|null $aliasName
+     * @param bool $distinct
      * @return string
      */
-    protected function normalizeName(string $name): string
+    protected function createAggregate(string $name, $columnName, $aliasName = null, $distinct = false): string
     {
-        return '`'.trim($name).'`';
+        $aggregate = $name.'(';
+
+        if ($columnName instanceof Raw) {
+            return $aggregate.(string)$columnName.')';
+        }
+
+        if ($distinct) {
+            $aggregate .= 'DISTINCT ';
+        }
+
+        $aggregate .= $this->quoteName($columnName).')';
+        if (null !== $aliasName) {
+            $aggregate .= ' AS '.$this->quoteName($aliasName);
+        }
+
+        return $aggregate;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        if (null === $this->parts['from']) {
+            return '';
+        }
+
+        if (null === $this->parts['select']) {
+            $this->parts['select'] = new Raw('*');
+        }
+
+        $query = 'SELECT';
+
+        if ($this->parts['select'] instanceof Raw) {
+            $query .= ' '.(string)$this->parts['select'];
+        } else {
+            if ($this->parts['distinct']) {
+                $query .= ' DISTINCT';
+            }
+
+            $query .= ' '.implode(', ', $this->parts['select']);
+        }
+
+        $query .= ' FROM ';
+
+        if ($this->parts['from'] instanceof Raw) {
+            $query .= (string)$this->parts['from'];
+        } else {
+            $query .= $this->parts['from'];
+        }
+
+        return $query.';';
     }
 }
