@@ -5,7 +5,7 @@ class MySqlCompiler
     /**
      * Quote an SQL name.
      *
-     * Syntax:
+     * Grammar:
      *      *|`sql_name`.
      *
      * @param string $name
@@ -21,7 +21,7 @@ class MySqlCompiler
     /**
      * Quote an SQL string.
      *
-     * Syntax:
+     * Grammar:
      *      'sql_string'.
      *
      * @param string $string
@@ -35,7 +35,7 @@ class MySqlCompiler
     /**
      * Compile an SQL name.
      *
-     * Syntax:
+     * Grammar:
      *      sql_name_components[ AS `sql_name`].
      *
      * @param mixed $name
@@ -45,7 +45,7 @@ class MySqlCompiler
     {
         $name = (string)$name;
 
-        if (preg_match('/ as /i', $name)) {
+        if (preg_match('/\s+as\s+/i', $name)) {
             return $this->compileAliasedName($name);
         }
 
@@ -55,7 +55,7 @@ class MySqlCompiler
     /**
      * Compile an aliased SQL name.
      *
-     * Syntax:
+     * Grammar:
      *      sql_name_components AS `sql_name`.
      *
      * @param string $aliasedName
@@ -63,7 +63,7 @@ class MySqlCompiler
      */
     public function compileAliasedName(string $aliasedName): string
     {
-        $aliasedNameParts = preg_split('/ as /i', $aliasedName);
+        $aliasedNameParts = preg_split('/\s+as\s+/i', $aliasedName);
 
         $name = $aliasedNameParts[0];
         $alias = $aliasedNameParts[1];
@@ -74,7 +74,7 @@ class MySqlCompiler
     /**
      * Compile an SQL name components.
      *
-     * Syntax:
+     * Grammar:
      *      [`sql_name`.]`sql_name` or
      *      [[`sql_name`.]`sql_name`.]`sql_name`.
      *
@@ -89,7 +89,7 @@ class MySqlCompiler
     /**
      * Compile an SQL value.
      *
-     * Syntax:
+     * Grammar:
      *      NULL|TRUE|FALSE|int|float|?|:sql_parameter|'sql_string'.
      *
      * @param mixed $value
