@@ -36,7 +36,7 @@ class MySqlCompiler
      * Compile an SQL name.
      *
      * Syntax:
-     *      sql_name_components[ AS sql_name].
+     *      sql_name_components[ AS `sql_name`].
      *
      * @param mixed $name
      * @return string
@@ -56,7 +56,7 @@ class MySqlCompiler
      * Compile an aliased SQL name.
      *
      * Syntax:
-     *      sql_name_components AS sql_name.
+     *      sql_name_components AS `sql_name`.
      *
      * @param string $aliasedName
      * @return string
@@ -75,8 +75,8 @@ class MySqlCompiler
      * Compile an SQL name components.
      *
      * Syntax:
-     *      [sql_name.]sql_name or
-     *      [[sql_name.]sql_name.]sql_name
+     *      [`sql_name`.]`sql_name` or
+     *      [[`sql_name`.]`sql_name`.]`sql_name`.
      *
      * @param string $nameComponents
      * @return string
@@ -90,7 +90,7 @@ class MySqlCompiler
      * Compile an SQL value.
      *
      * Syntax:
-     *      NULL|TRUE|FALSE|int|float|?|:patameter|'sql_name'.
+     *      NULL|TRUE|FALSE|int|float|?|:sql_parameter|'sql_string'.
      *
      * @param mixed $value
      * @return string
