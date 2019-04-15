@@ -110,7 +110,7 @@ class MySqlCompiler
         }
 
         if (is_int($value) || is_float($value)) {
-            return $value;
+            return (string)$value;
         }
 
         $value = (string)$value;
