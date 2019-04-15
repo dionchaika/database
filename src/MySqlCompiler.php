@@ -15,7 +15,7 @@ class MySqlCompiler
     {
         return ('*' === $name)
             ? $name
-            : "`{${str_replace('`', '\\`', $name)}}`";
+            : '`'.str_replace('`', '\\`', $name).'`';
     }
 
     /**
@@ -29,7 +29,7 @@ class MySqlCompiler
      */
     public function quoteString(string $string): string
     {
-        return "'{${str_replace('\'', '\\\'', $string)}}'";
+        return '\''.str_replace('\'', '\\\'', $string).'\'';
     }
 
     /**
@@ -83,7 +83,7 @@ class MySqlCompiler
      */
     public function compileNameComponents(string $nameComponents): string
     {
-        return implode('.', array_map(['static', 'quoteName'], explode('.', $nameComponents)));
+        return implode('.', array_map(['static', 'quoteName'], explode('.', $nameComponents, 3)));
     }
 
     /**
