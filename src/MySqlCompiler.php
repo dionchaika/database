@@ -83,7 +83,7 @@ class MySqlCompiler
      */
     public function compileNameComponents(string $nameComponents): string
     {
-        return implode('.', array_map(['static', 'quoteName'], explode('.', $nameComponents, 3)));
+        return implode('.', array_map(['static', 'quoteName'], preg_split('/\s*\.\s*/', $nameComponents, 3)));
     }
 
     /**
