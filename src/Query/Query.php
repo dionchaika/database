@@ -45,7 +45,7 @@ class Query
      *
      * @var int
      */
-    protected $type = Query::TYPE_SELECT;
+    protected $type = self::TYPE_SELECT;
 
     /**
      * The array of query parts.
@@ -54,6 +54,7 @@ class Query
      */
     protected $parts = [
         'select' => [],
+        'distinct' => false,
         'from' => null,
         'where' => [],
         'orderBy' => [],
@@ -76,10 +77,12 @@ class Query
      * Invoke the query SELECT statement.
      *
      * @param mixed|null $columnNames
-     * @return $this
+     * @return self
      */
-    public function select($columnNames = null): Query
+    public function select($columnNames = null): self
     {
+        $this->type = self::TYPE_SELECT;
+
         if (null !== $columnNames) {
             $columnNames = is_array($columnNames)
                 ? $columnNames
@@ -92,5 +95,81 @@ class Query
         }
 
         return $this;
+    }
+
+    /**
+     * Invoke the raw query SELECT statement.
+     *
+     * @param string $raw
+     * @return self
+     */
+    public function selectRaw(string $raw): self
+    {
+        $this->type = self::TYPE_SELECT;
+        $this->parts['select'][] = $raw;
+
+        return $this;
+    }
+
+    /**
+     * Make the query SELECT statement distinct.
+     *
+     * @return self
+     */
+    public function distinct(): self
+    {
+        $this->parts['distinct'] = true;
+        return $this;
+    }
+
+    /**
+     * Set a query table.
+     *
+     * @param mixed $tableName
+     * @return self
+     */
+    public function from($tableName): self
+    {
+        $this->parts['from'] = $this->compiler->compileName($tableName);
+        return $this;
+    }
+
+    /**
+     * Set a raw query table.
+     *
+     * @param string $raw
+     * @return self
+     */
+    public function fromRaw(string $raw): self
+    {
+        $this->parts['from'] = $raw;
+        return $this;
+    }
+
+    /**
+     * Get the query SQL.
+     *
+     * @return string
+     */
+    public function getSql(): string
+    {
+        $sql = '';
+
+        if ($this->type === self::TYPE_SELECT) {
+            $sql .= $this->compiler->compileSelect($this->parts);
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Get the string
+     * representation of the query.
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getSql();
     }
 }
