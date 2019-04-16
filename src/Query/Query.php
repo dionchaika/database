@@ -11,6 +11,8 @@
 
 namespace Dionchaika\Database\Query;
 
+use Throwable;
+
 class Query
 {
     /**
@@ -86,6 +88,7 @@ class Query
      *
      * @param mixed|null $columnNames
      * @return self
+     * @throws \InvalidArgumentException
      */
     public function select($columnNames = null): self
     {
@@ -137,6 +140,7 @@ class Query
      *
      * @param mixed $tableName
      * @return self
+     * @throws \InvalidArgumentException
      */
     public function from($tableName): self
     {
@@ -161,6 +165,7 @@ class Query
      *
      * @param mixed $columnNames
      * @return self
+     * @throws \InvalidArgumentException
      */
     public function orderBy($columnNames): self
     {
@@ -189,6 +194,7 @@ class Query
      *
      * @param mixed $columnNames
      * @return self
+     * @throws \InvalidArgumentException
      */
     public function orderByDesc($columnNames): self
     {
@@ -206,6 +212,7 @@ class Query
      * @param int      $count
      * @param int|null $offset
      * @return self
+     * @throws \InvalidArgumentException
      */
     public function limit(int $count, ?int $offset = null): self
     {
@@ -229,32 +236,14 @@ class Query
      * Get the query SQL.
      *
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function getSql(): string
     {
         $sql = '';
 
         if ($this->statement === self::STATEMENT_SELECT) {
-            if (null === $this->parts['from']) {
-                return $sql;
-            }
-
-            if (empty($this->parts['select'])) {
-                $this->parts['select'][] = '*';
-            }
-
-            $sql = $this->parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT';
-            $sql .= ' '.implode(', ', $this->parts['select']).' FROM '.$this->parts['from'];
-
-            if (!empty($this->parts['orderBy'])) {
-                $sql .= ' ORDER BY '.implode(', ', $this->parts['orderBy']);
-            }
-
-            if (null !== $this->parts['limit']) {
-                $sql .= ' LIMIT '.$this->parts['limit'];
-            }
-
-            $sql .= ';';
+            $sql .= $this->compiler->compileSelect($this->parts);
         }
 
         return $sql;
@@ -268,7 +257,11 @@ class Query
      */
     public function __toString(): string
     {
-        return $this->getSql();
+        try {
+            return $this->getSql();
+        } catch (Throwable $e) {
+            return '';
+        }
     }
 
     /**

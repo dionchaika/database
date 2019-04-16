@@ -78,9 +78,10 @@ class MySqlCompiler implements CompilerInterface
      * Grammar:
      *      `sql_name`([, `sql_name`])* ASC|DESC.
      *
-     * @param array $columnNames
+     * @param array  $columnNames
      * @param string $direction
      * @return string
+     * @throws \InvalidArgumentException
      */
     public function compileOrderBy(array $columnNames, string $direction): string
     {
@@ -107,6 +108,42 @@ class MySqlCompiler implements CompilerInterface
     public function compileLimit(int $count, ?int $offset = null): string
     {
         return (null === $offset) ? (string)$count : $offset.', '.$count;
+    }
+
+    /**
+     * Compile an SQL SELECT statement.
+     *
+     * Grammar:
+     *      SELECT[ DISTINCT] sql_name_components AS `sql_name`|raw([, sql_name_components AS `sql_name`|raw])*
+     *      FROM sql_name_components AS `sql_name`|raw
+     *      ORDER BY `sql_name`([, `sql_name`])* ASC|DESC([, `sql_name`([, `sql_name`])* ASC|DESC])*
+     *      LIMIT number[, number].
+     *
+     * @param array $parts
+     * @return string
+     */
+    public function compileSelect(array $parts): string
+    {
+        if (null === $parts['from']) {
+            return '';
+        }
+
+        if (empty($parts['select'])) {
+            $parts['select'][] = '*';
+        }
+
+        $sql = $parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT';
+        $sql .= ' '.implode(', ', $parts['select']).' FROM '.$parts['from'];
+
+        if (!empty($parts['orderBy'])) {
+            $sql .= ' ORDER BY '.implode(', ', $parts['orderBy']);
+        }
+
+        if (null !== $parts['limit']) {
+            $sql .= ' LIMIT '.$parts['limit'];
+        }
+
+        return $sql.';';
     }
 
     /**
