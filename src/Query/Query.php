@@ -54,13 +54,13 @@ class Query
 
         'select'   => [],
         'distinct' => false,
-        'from'     => ['db' => null, 'table' => null, 'alias' => null],
+        'from'     => null,
         'where'    => [],
         'orderBy'  => [],
-        'limit'    => ['count' => null, 'offset' => null],
-        'into'     => ['db' => null, 'table' => null, 'alias' => null],
+        'limit'    => null,
+        'into'     => null,
         'values'   => [],
-        'update'   => ['db' => null, 'table' => null, 'alias' => null],
+        'update'   => null,
         'set'      => []
 
     ];
@@ -81,9 +81,7 @@ class Query
                 ? $columnNames
                 : func_get_args();
 
-            $this->parts['select'] = array_merge(
-                $this->parts['select'], $columnNames
-            );
+            //
         }
 
         return $this;
@@ -127,9 +125,7 @@ class Query
      */
     public function from($tableName, $aliasName = null, $databaseName = null): self
     {
-        $this->parts['from']['db'] = $databaseName;
-        $this->parts['from']['table'] = $tableName;
-        $this->parts['from']['alias'] = $aliasName;
+        //
 
         return $this;
     }
@@ -142,7 +138,7 @@ class Query
      */
     public function fromRaw($expression): self
     {
-        $this->parts['from']['table'] = new Raw($expression);
+        $this->parts['from'] = new Raw($expression);
         return $this;
     }
 
@@ -155,8 +151,7 @@ class Query
      */
     public function limit(int $count, ?int $offset = null): self
     {
-        $this->parts['limit']['count']  = $count;
-        $this->parts['limit']['offset'] = $offset;
+        //
 
         return $this;
     }
@@ -169,31 +164,7 @@ class Query
      */
     public function limitRaw($expression): self
     {
-        $this->parts['limit']['count'] = new Raw($expression);
-        return $this;
-    }
-
-    /**
-     * Set a query OFFSET clause.
-     *
-     * @param int $offset
-     * @return self
-     */
-    public function offset(int $offset): self
-    {
-        $this->parts['limit']['offset'] = $offset;
-        return $this;
-    }
-
-    /**
-     * Set a query OFFSET clause.
-     *
-     * @param mixed $expression
-     * @return self
-     */
-    public function offsetRaw($expression): self
-    {
-        $this->parts['limit']['offset'] = new Raw($expression);
+        $this->parts['limit'] = new Raw($expression);
         return $this;
     }
 
@@ -209,13 +180,13 @@ class Query
 
         $this->parts['select']   = [];
         $this->parts['distinct'] = false;
-        $this->parts['from']     = ['db' => null, 'table' => null, 'alias' => null];
+        $this->parts['from']     = null;
         $this->parts['where']    = [];
         $this->parts['orderBy']  = [];
-        $this->parts['limit']    = ['count' => null, 'offset' => null];
-        $this->parts['into']     = ['db' => null, 'table' => null, 'alias' => null];
+        $this->parts['limit']    = null;
+        $this->parts['into']     = null;
         $this->parts['values']   = [];
-        $this->parts['update']   = ['db' => null, 'table' => null, 'alias' => null];
+        $this->parts['update']   = null;
         $this->parts['set']      = [];
     }
 }
