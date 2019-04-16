@@ -109,7 +109,7 @@ class Query
      * Invoke a query
      * SELECT statement.
      *
-     * @param mixed $expression
+     * @param string $expression
      * @return self
      */
     public function selectRaw(string $expression): self
