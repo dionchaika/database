@@ -15,32 +15,54 @@ class Query
 {
     /**
      * The query
-     * SELECT type.
+     * SELECT statement.
      */
-    const TYPE_SELECT = 0;
+    const STATEMENT_SELECT = 0;
 
     /**
      * The query
-     * INSERT type.
+     * INSERT statement.
      */
-    const TYPE_INSERT = 1;
+    const STATEMENT_INSERT = 1;
 
     /**
      * The query
-     * UPDATE type.
+     * UPDATE statement.
      */
-    const TYPE_UPDATE = 2;
+    const STATEMENT_UPDATE = 2;
 
     /**
      * The query
-     * DELETE type.
+     * DELETE statement.
      */
-    const TYPE_DELETE = 3;
+    const STATEMENT_DELETE = 3;
 
     /**
-     * The query type.
+     * The query statement.
      *
      * @var int
      */
-    protected $type = self::TYPE_SELECT;
+    protected $statement = self::STATEMENT_SELECT;
+
+    /**
+     * The array
+     * of query bindings.
+     *
+     * @var array
+     */
+    protected $bindings = [];
+
+    /**
+     * Bind a query parameter
+     *
+     * @param int|string $parameter
+     * @param mixed $value
+     * @return self
+     */
+    public function bindParameter($parameter, &$value): self
+    {
+        //
+
+        return $this;
+    }
 }
