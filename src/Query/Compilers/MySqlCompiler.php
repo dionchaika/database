@@ -1,5 +1,7 @@
 <?php
 
+namespace Dionchaika\Database\Query\Compilers;
+
 class MySqlCompiler
 {
     /**

@@ -18,8 +18,6 @@
         }
     },
     "require": {
-        "php": "^7.0",
-        "ext-pdo": "*",
-        "ext-mysqli": "*"
+        "php": "^7.0"
     }
 }
