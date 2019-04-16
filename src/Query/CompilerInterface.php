@@ -11,4 +11,21 @@
 
 namespace Dionchaika\Database\Query;
 
-interface CompilerInterface {}
+interface CompilerInterface
+{
+    /**
+     * Compile an SQL name.
+     *
+     * @param mixed $name
+     * @return string
+     */
+    public function compileName($name): string;
+
+    /**
+     * Compile an SQL value.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    public function compileValue($value): string;
+}
