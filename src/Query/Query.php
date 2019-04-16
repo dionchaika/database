@@ -147,6 +147,57 @@ class Query
     }
 
     /**
+     * Set a query LIMIT clause.
+     *
+     * @param int      $count
+     * @param int|null $offset
+     * @return self
+     */
+    public function limit(int $count, ?int $offset = null): self
+    {
+        $this->parts['limit']['count']  = $count;
+        $this->parts['limit']['offset'] = $offset;
+
+        return $this;
+    }
+
+    /**
+     * Set a query LIMIT clause.
+     *
+     * @param mixed $expression
+     * @return self
+     */
+    public function limitRaw($expression): self
+    {
+        $this->parts['limit']['count'] = new Raw($expression);
+        return $this;
+    }
+
+    /**
+     * Set a query OFFSET clause.
+     *
+     * @param int $offset
+     * @return self
+     */
+    public function offset(int $offset): self
+    {
+        $this->parts['limit']['offset'] = $offset;
+        return $this;
+    }
+
+    /**
+     * Set a query OFFSET clause.
+     *
+     * @param mixed $expression
+     * @return self
+     */
+    public function offsetRaw($expression): self
+    {
+        $this->parts['limit']['offset'] = new Raw($expression);
+        return $this;
+    }
+
+    /**
      * Invoke a query statement.
      *
      * @param int $statement
