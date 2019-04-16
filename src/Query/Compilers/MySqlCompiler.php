@@ -114,9 +114,11 @@ class MySqlCompiler implements CompilerInterface
      * Compile an SQL SELECT statement.
      *
      * Grammar:
-     *      SELECT[ DISTINCT] sql_name_components[ AS `sql_name`]|raw([, sql_name_components[ AS `sql_name`]|raw])*
+     *      SELECT[ DISTINCT] sql_name_components[ AS `sql_name`]|raw
+     *          ([, sql_name_components[ AS `sql_name`]|raw])*
      *      FROM sql_name_components[ AS `sql_name`]|raw
-     *      ORDER BY `sql_name`([, `sql_name`])* ASC|DESC([, `sql_name`([, `sql_name`])* ASC|DESC])*
+     *      ORDER BY `sql_name`([, `sql_name`])* ASC|DESC
+     *          ([, `sql_name`([, `sql_name`])* ASC|DESC])*
      *      LIMIT number[, number].
      *
      * @param array $parts
@@ -142,6 +144,79 @@ class MySqlCompiler implements CompilerInterface
         if (null !== $parts['limit']) {
             $sql .= ' LIMIT '.$parts['limit'];
         }
+
+        return $sql.';';
+    }
+
+    /**
+     * Compile an SQL INSERT statement.
+     *
+     * Grammar:
+     *      INSERT INTO sql_name_components[ AS `sql_name`]|raw
+     *      ([sql_name_components[ AS `sql_name`]|raw
+     *          ([, sql_name_components[ AS `sql_name`]|raw])*])
+     *      VALUES ([NULL|TRUE|FALSE|number|?|:sql_parameter|'sql_string'|raw
+     *          ([, NULL|TRUE|FALSE|number|?|:sql_parameter|'sql_string'|raw])]).
+     *
+     * @param array $parts
+     * @return string
+     */
+    public function compileInsert(array $parts): string
+    {
+        if (null === $parts['into']) {
+            return '';
+        }
+
+        $sql = 'INSERT INTO '.$parts['into'];
+        $sql .= ' ('.implode(', ', array_keys($parts['values'])).')';
+        $sql .= ' VALUES ('.implode(', ', array_values($parts['values'])).')';
+
+        return $sql.';';
+    }
+
+    /**
+     * Compile an SQL UPDATE statement.
+     *
+     * Grammar:
+     *      UPDATE sql_name_components[ AS `sql_name`]|raw
+     *      SET `sql_name` = NULL|TRUE|FALSE|number|?|:sql_parameter|'sql_string'|raw
+     *          ([, `sql_name` = NULL|TRUE|FALSE|number|?|:sql_parameter|'sql_string'|raw])*.
+     *
+     * @param array $parts
+     * @return string
+     */
+    public function compileUpdate(array $parts): string
+    {
+        if (null === $parts['update'] || empty($parts['set'])) {
+            return '';
+        }
+
+        $set = [];
+        foreach ($parts['set'] as $key => $value) {
+            $set[] = $key.' = '.$value;
+        }
+
+        $sql = 'UPDATE '.$parts['update'].' SET '.implode(', ', $set);
+
+        return $sql.';';
+    }
+
+    /**
+     * Compile an SQL DELETE statement.
+     *
+     * Grammar:
+     *      DELETE FROM sql_name_components[ AS `sql_name`]|raw.
+     *
+     * @param array $parts
+     * @return string
+     */
+    public function compileDelete(array $parts): string
+    {
+        if ('' === $parts['from']) {
+            return '';
+        }
+
+        $sql = 'DELETE FROM '.$parts['from'];
 
         return $sql.';';
     }
