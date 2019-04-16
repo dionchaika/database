@@ -53,7 +53,7 @@ class Query
     protected $bindings = [];
 
     /**
-     * Bind a query parameter
+     * Bind a query parameter.
      *
      * @param int|string $parameter
      * @param mixed $value
