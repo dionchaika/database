@@ -54,13 +54,13 @@ class Query
 
         'select'   => [],
         'distinct' => false,
-        'from'     => null,
+        'from'     => ['db' => null, 'table' => null, 'alias' => null],
         'where'    => [],
         'orderBy'  => [],
-        'limit'    => null,
-        'into'     => null,
+        'limit'    => ['count' => null, 'offset' => null],
+        'into'     => ['db' => null, 'table' => null, 'alias' => null],
         'values'   => [],
-        'update'   => null,
+        'update'   => ['db' => null, 'table' => null, 'alias' => null],
         'set'      => []
 
     ];
@@ -105,6 +105,48 @@ class Query
     }
 
     /**
+     * Make a query
+     * SELECT statement distinct.
+     *
+     * @return self
+     */
+    public function distinct(): self
+    {
+        $this->parts['distinct'] = true;
+        return $this;
+    }
+
+    /**
+     * Set a query table.
+     *
+     * @param mixed      $tableName
+     * @param mixed|null $aliasName
+     * @param mixed|null $databaseName
+     *
+     * @return self
+     */
+    public function from($tableName, $aliasName = null, $databaseName = null): self
+    {
+        $this->parts['from']['db'] = $databaseName;
+        $this->parts['from']['table'] = $tableName;
+        $this->parts['from']['alias'] = $aliasName;
+
+        return $this;
+    }
+
+    /**
+     * Set a query table.
+     *
+     * @param mixed $expression
+     * @return self
+     */
+    public function fromRaw($expression): self
+    {
+        $this->parts['from']['table'] = new Raw($expression);
+        return $this;
+    }
+
+    /**
      * Invoke a query statement.
      *
      * @param int $statement
@@ -116,13 +158,13 @@ class Query
 
         $this->parts['select']   = [];
         $this->parts['distinct'] = false;
-        $this->parts['from']     = null;
+        $this->parts['from']     = ['db' => null, 'table' => null, 'alias' => null];
         $this->parts['where']    = [];
         $this->parts['orderBy']  = [];
-        $this->parts['limit']    = null;
-        $this->parts['into']     = null;
+        $this->parts['limit']    = ['count' => null, 'offset' => null];
+        $this->parts['into']     = ['db' => null, 'table' => null, 'alias' => null];
         $this->parts['values']   = [];
-        $this->parts['update']   = null;
+        $this->parts['update']   = ['db' => null, 'table' => null, 'alias' => null];
         $this->parts['set']      = [];
     }
 }
