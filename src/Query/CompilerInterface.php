@@ -30,6 +30,15 @@ interface CompilerInterface
     public function compileValue($value): string;
 
     /**
+     * Compile an SQL ORDER BY clause.
+     *
+     * @param array $columnNames
+     * @param string $direction
+     * @return string
+     */
+    public function compileOrderBy(array $columnNames, string $direction): string;
+
+    /**
      * Compile an SQL LIMIT clause.
      *
      * @param int      $count

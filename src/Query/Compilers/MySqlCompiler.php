@@ -11,6 +11,7 @@
 
 namespace Dionchaika\Database\Query\Compilers;
 
+use InvalidArgumentException;
 use Dionchaika\Database\Query\CompilerInterface;
 
 class MySqlCompiler implements CompilerInterface
@@ -69,6 +70,28 @@ class MySqlCompiler implements CompilerInterface
         }
 
         return $this->quoteString($value);
+    }
+
+    /**
+     * Compile an SQL ORDER BY clause.
+     *
+     * Grammar:
+     *      `sql_name`([, `sql_name`])* ASC|DESC.
+     *
+     * @param array $columnNames
+     * @param string $direction
+     * @return string
+     */
+    public function compileOrderBy(array $columnNames, string $direction): string
+    {
+        $direction = strtoupper($direction);
+        if ('ASC' !== $direction && 'DESC' !== $direction) {
+            throw new InvalidArgumentException(
+                'SQL "ORDER BY" clause direction must be "ASC" or "DESC"!'
+            );
+        }
+
+        return implode(', ', array_map(['static', 'quoteName'], $columnNames)).' '.$direction;
     }
 
     /**

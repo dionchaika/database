@@ -168,12 +168,7 @@ class Query
             ? $columnNames
             : func_get_args();
 
-        $orderBy = [];
-        foreach ($columnNames as $columnName) {
-            $orderBy[] = $this->compiler->compileName($columnName);
-        }
-
-        $this->parts['orderBy'][] = implode(', ', $orderBy).' ASC';
+        $this->parts['orderBy'][] = $this->compiler->compileOrderBy($columnNames, 'ASC');
         return $this;
     }
 
@@ -201,12 +196,7 @@ class Query
             ? $columnNames
             : func_get_args();
 
-        $orderBy = [];
-        foreach ($columnNames as $columnName) {
-            $orderBy[] = $this->compiler->compileName($columnName);
-        }
-
-        $this->parts['orderBy'][] = implode(', ', $orderBy).' DESC';
+        $this->parts['orderBy'][] = $this->compiler->compileOrderBy($columnNames, 'DESC');
         return $this;
     }
 
