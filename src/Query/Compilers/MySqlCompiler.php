@@ -16,24 +16,6 @@ use Dionchaika\Database\Query\CompilerInterface;
 class MySqlCompiler implements CompilerInterface
 {
     /**
-     * The array
-     * of SQL parts.
-     *
-     * @var array
-     */
-    protected $sqlParts = [
-        'select' => [],
-        'from' => null,
-        'where' => [],
-        'orderBy' => [],
-        'limit' => null,
-        'into' => null,
-        'values' => [],
-        'update' => null,
-        'set' => []
-    ];
-
-    /**
      * Compile an SQL name.
      *
      * Grammar:
@@ -135,7 +117,7 @@ class MySqlCompiler implements CompilerInterface
         $name = $aliasedNameParts[0];
         $alias = $aliasedNameParts[1];
 
-        return "{$this->compileNameComponents($name)} AS {$this->quoteName($alias)}";
+        return $this->compileNameComponents($name).' AS '.$this->quoteName($alias);
     }
 
     /**
