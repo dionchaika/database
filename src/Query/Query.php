@@ -118,4 +118,68 @@ class Query
 
         return $this;
     }
+
+    /**
+     * Make the query
+     * SELECT statement distinct.
+     *
+     * @return self
+     */
+    public function distinct(): self
+    {
+        $this->parts['distinct'] = true;
+        return $this;
+    }
+
+    /**
+     * Set a query table.
+     *
+     * @param \Dionchaika\Database\Query\RawSql|mixed $tableName
+     * @return self
+     */
+    public function from($tableName): self
+    {
+        $this->parts['from'] = $tableName;
+        return $this;
+    }
+
+    /**
+     * Set a query table.
+     *
+     * @param string $rawSql
+     * @return self
+     */
+    public function fromRaw(string $rawSql): self
+    {
+        $this->parts['from'] = new RawSql($rawSql);
+        return $this;
+    }
+
+    /**
+     * Add a query
+     * ORDER BY clause.
+     *
+     * @param \Dionchaika\Database\Query\RawSql|array|mixed $columnNames
+     * @param string $direction
+     * @return self
+     */
+    public function orderBy($columnNames, string $direction): self
+    {
+        if ($columnNames instanceof RawSql) {
+            $this->parts['orderBy'][] = $columnNames;
+        } else {
+            $columnNames = is_array($columnNames)
+                ? $columnNames
+                : [$columnNames];
+
+            $this->parts['orderBy'][] = [
+
+                'colums' => $columnNames,
+                'direction'    => $direction
+
+            ];
+        }
+
+        return $this;
+    }
 }
