@@ -51,16 +51,18 @@ class Query
      * @var array
      */
     protected $parts = [
-        'select' => [],
+
+        'select'   => [],
         'distinct' => false,
-        'from' => null,
-        'where' => [],
-        'orderBy' => [],
-        'limit' => null,
-        'into' => null,
-        'values' => [],
-        'update' => null,
-        'set' => []
+        'from'     => null,
+        'where'    => [],
+        'orderBy'  => [],
+        'limit'    => null,
+        'into'     => null,
+        'values'   => [],
+        'update'   => null,
+        'set'      => []
+
     ];
 
     /**
