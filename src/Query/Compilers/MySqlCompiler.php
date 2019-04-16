@@ -57,7 +57,7 @@ class MySqlCompiler implements CompilerInterface
      * Compile an SQL value.
      *
      * Grammar:
-     *      NULL|TRUE|FALSE|int|float|?|:sql_parameter|'sql_string'.
+     *      NULL|TRUE|FALSE|number|?|:sql_parameter|'sql_string'.
      *
      * @param mixed $value
      * @return string
