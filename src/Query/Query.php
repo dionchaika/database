@@ -68,15 +68,54 @@ class Query
     /**
      * The query compiler.
      *
-     * @var \Dionchaika\Database\CompilerInterface
+     * @var \Dionchaika\Database\Query\CompilerInterface
      */
     protected $compiler;
 
     /**
-     * @param \Dionchaika\Database\CompilerInterface $compiler
+     * @param \Dionchaika\Database\Query\CompilerInterface $compiler
      */
     public function __construct(CompilerInterface $compiler)
     {
         $this->compiler = $compiler;
+    }
+
+    /**
+     * Invoke the query
+     * SELECT statement.
+     *
+     * @param \Dionchaika\Database\Query\RawSql|mixed|null $columnNames
+     * @return self
+     */
+    public function select($columnNames = null): self
+    {
+        $this->type = self::TYPE_SELECT;
+
+        if (null !== $columnNames) {
+            $columnNames = is_array($columnNames)
+                ? $columnNames
+                : func_get_args();
+
+            $this->parts['select'] = array_merge(
+                $this->parts['select'], $columnNames
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Invoke the query
+     * SELECT statement.
+     *
+     * @param string $rawSql
+     * @return self
+     */
+    public function selectRaw(string $rawSql): self
+    {
+        $this->type = self::TYPE_SELECT;
+        $this->parts['select'][] = new RawSql($rawSql);
+
+        return $this;
     }
 }
