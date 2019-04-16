@@ -81,105 +81,14 @@ class Query
     }
 
     /**
-     * Invoke the query
-     * SELECT statement.
+     * Get the raw
+     * SQL expression instance.
      *
-     * @param \Dionchaika\Database\Query\RawSql|mixed|null $columnNames
-     * @return self
+     * @param string $expression
+     * @return \Dionchaika\Database\Query\Raw
      */
-    public function select($columnNames = null): self
+    public static function raw(string $expression): Raw
     {
-        $this->type = self::TYPE_SELECT;
-
-        if (null !== $columnNames) {
-            $columnNames = is_array($columnNames)
-                ? $columnNames
-                : func_get_args();
-
-            $this->parts['select'] = array_merge(
-                $this->parts['select'], $columnNames
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Invoke the query
-     * SELECT statement.
-     *
-     * @param string $rawSql
-     * @return self
-     */
-    public function selectRaw(string $rawSql): self
-    {
-        $this->type = self::TYPE_SELECT;
-        $this->parts['select'][] = new RawSql($rawSql);
-
-        return $this;
-    }
-
-    /**
-     * Make the query
-     * SELECT statement distinct.
-     *
-     * @return self
-     */
-    public function distinct(): self
-    {
-        $this->parts['distinct'] = true;
-        return $this;
-    }
-
-    /**
-     * Set a query table.
-     *
-     * @param \Dionchaika\Database\Query\RawSql|mixed $tableName
-     * @return self
-     */
-    public function from($tableName): self
-    {
-        $this->parts['from'] = $tableName;
-        return $this;
-    }
-
-    /**
-     * Set a query table.
-     *
-     * @param string $rawSql
-     * @return self
-     */
-    public function fromRaw(string $rawSql): self
-    {
-        $this->parts['from'] = new RawSql($rawSql);
-        return $this;
-    }
-
-    /**
-     * Add a query
-     * ORDER BY clause.
-     *
-     * @param \Dionchaika\Database\Query\RawSql|array|mixed $columnNames
-     * @param string $direction
-     * @return self
-     */
-    public function orderBy($columnNames, string $direction): self
-    {
-        if ($columnNames instanceof RawSql) {
-            $this->parts['orderBy'][] = $columnNames;
-        } else {
-            $columnNames = is_array($columnNames)
-                ? $columnNames
-                : [$columnNames];
-
-            $this->parts['orderBy'][] = [
-
-                'colums'    => $columnNames,
-                'direction' => $direction
-
-            ];
-        }
-
-        return $this;
+        return new Raw($expression);
     }
 }
