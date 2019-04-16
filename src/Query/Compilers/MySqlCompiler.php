@@ -114,8 +114,8 @@ class MySqlCompiler implements CompilerInterface
      * Compile an SQL SELECT statement.
      *
      * Grammar:
-     *      SELECT[ DISTINCT] sql_name_components AS `sql_name`|raw([, sql_name_components AS `sql_name`|raw])*
-     *      FROM sql_name_components AS `sql_name`|raw
+     *      SELECT[ DISTINCT] sql_name_components[ AS `sql_name`]|raw([, sql_name_components[ AS `sql_name`]|raw])*
+     *      FROM sql_name_components[ AS `sql_name`]|raw
      *      ORDER BY `sql_name`([, `sql_name`])* ASC|DESC([, `sql_name`([, `sql_name`])* ASC|DESC])*
      *      LIMIT number[, number].
      *
