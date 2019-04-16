@@ -16,6 +16,24 @@ use Dionchaika\Database\Query\CompilerInterface;
 class MySqlCompiler implements CompilerInterface
 {
     /**
+     * The array
+     * of SQL parts.
+     *
+     * @var array
+     */
+    protected $sqlParts = [
+        'select' => [],
+        'from' => null,
+        'where' => [],
+        'orderBy' => [],
+        'limit' => null,
+        'into' => null,
+        'values' => [],
+        'update' => null,
+        'set' => []
+    ];
+
+    /**
      * Quote an SQL name.
      *
      * Grammar:
