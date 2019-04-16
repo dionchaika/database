@@ -66,6 +66,21 @@ class Query
     ];
 
     /**
+     * The query compiler.
+     *
+     * @var \Dionchaika\Database\Query\CompilerInterface
+     */
+    protected $compiler;
+
+    /**
+     * @param \Dionchaika\Database\Query\CompilerInterface $compiler
+     */
+    public function __construct(CompilerInterface $compiler)
+    {
+        $this->compiler = $compiler;
+    }
+
+    /**
      * Invoke a query
      * SELECT statement.
      *
@@ -81,7 +96,10 @@ class Query
                 ? $columnNames
                 : func_get_args();
 
-            //
+            foreach ($columnNames as $columnName) {
+                $this->parts['select'][]
+                    = $this->compiler->compileName($columnName);
+            }
         }
 
         return $this;
@@ -94,10 +112,10 @@ class Query
      * @param mixed $expression
      * @return self
      */
-    public function selectRaw($expression): self
+    public function selectRaw(string $expression): self
     {
         $this->invokeStatement(self::STATEMENT_SELECT);
-        $this->parts['select'][] = new Raw($expression);
+        $this->parts['select'][] = $expression;
 
         return $this;
     }
@@ -117,28 +135,78 @@ class Query
     /**
      * Set a query table.
      *
-     * @param mixed      $tableName
-     * @param mixed|null $aliasName
-     * @param mixed|null $databaseName
-     *
+     * @param mixed $tableName
      * @return self
      */
-    public function from($tableName, $aliasName = null, $databaseName = null): self
+    public function from($tableName): self
     {
-        //
-
+        $this->parts['from'] = $this->compiler->compileName($tableName);
         return $this;
     }
 
     /**
      * Set a query table.
      *
-     * @param mixed $expression
+     * @param string $expression
      * @return self
      */
-    public function fromRaw($expression): self
+    public function fromRaw(string $expression): self
     {
-        $this->parts['from'] = new Raw($expression);
+        $this->parts['from'] = $expression;
+        return $this;
+    }
+
+    /**
+     * Add a query ORDER BY (ASC) clause.
+     *
+     * @param mixed $columnNames
+     * @return self
+     */
+    public function orderBy($columnNames): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
+
+        $orderBy = [];
+        foreach ($columnNames as $columnName) {
+            $orderBy[] = $this->compiler->compileName($columnName);
+        }
+
+        $this->parts['orderBy'][] = implode(', ', $orderBy).' ASC';
+        return $this;
+    }
+
+    /**
+     * Add a query ORDER BY clause.
+     *
+     * @param string $expression
+     * @return self
+     */
+    public function orderByRaw(string $expression): self
+    {
+        $this->parts['orderBy'][] = $expression;
+        return $this;
+    }
+
+    /**
+     * Add a query ORDER BY (DESC) clause.
+     *
+     * @param mixed $columnNames
+     * @return self
+     */
+    public function orderByDesc($columnNames): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
+
+        $orderBy = [];
+        foreach ($columnNames as $columnName) {
+            $orderBy[] = $this->compiler->compileName($columnName);
+        }
+
+        $this->parts['orderBy'][] = implode(', ', $orderBy).' DESC';
         return $this;
     }
 
@@ -151,21 +219,66 @@ class Query
      */
     public function limit(int $count, ?int $offset = null): self
     {
-        //
-
+        $this->parts['limit'] = $this->compiler->compileLimit($count, $offset);
         return $this;
     }
 
     /**
      * Set a query LIMIT clause.
      *
-     * @param mixed $expression
+     * @param string $expression
      * @return self
      */
-    public function limitRaw($expression): self
+    public function limitRaw(string $expression): self
     {
-        $this->parts['limit'] = new Raw($expression);
+        $this->parts['limit'] = $expression;
         return $this;
+    }
+
+    /**
+     * Get the query SQL.
+     *
+     * @return string
+     */
+    public function getSql(): string
+    {
+        $sql = '';
+
+        if ($this->statement === self::STATEMENT_SELECT) {
+            if (null === $this->parts['from']) {
+                return $sql;
+            }
+
+            if (empty($this->parts['select'])) {
+                $this->parts['select'][] = '*';
+            }
+
+            $sql = $this->parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT';
+            $sql .= ' '.implode(', ', $this->parts['select']).' FROM '.$this->parts['from'];
+
+            if (!empty($this->parts['orderBy'])) {
+                $sql .= ' ORDER BY '.implode(', ', $this->parts['orderBy']);
+            }
+
+            if (null !== $this->parts['limit']) {
+                $sql .= ' LIMIT '.$this->parts['limit'];
+            }
+
+            $sql .= ';';
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Get the string
+     * representation of the query.
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getSql();
     }
 
     /**

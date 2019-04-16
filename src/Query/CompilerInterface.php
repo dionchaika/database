@@ -28,4 +28,13 @@ interface CompilerInterface
      * @return string
      */
     public function compileValue($value): string;
+
+    /**
+     * Compile an SQL LIMIT clause.
+     *
+     * @param int      $count
+     * @param int|null $offset
+     * @return string
+     */
+    public function compileLimit(int $count, ?int $offset = null): string;
 }

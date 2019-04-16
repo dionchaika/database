@@ -72,6 +72,21 @@ class MySqlCompiler implements CompilerInterface
     }
 
     /**
+     * Compile an SQL LIMIT clause.
+     *
+     * Grammar:
+     *      number[, number].
+     *
+     * @param int      $count
+     * @param int|null $offset
+     * @return string
+     */
+    public function compileLimit(int $count, ?int $offset = null): string
+    {
+        return (null === $offset) ? (string)$count : $offset.', '.$count;
+    }
+
+    /**
      * Quote an SQL name.
      *
      * Grammar:
