@@ -43,4 +43,47 @@ class Query
      * @var int
      */
     protected $statement = self::STATEMENT_SELECT;
+
+    /**
+     * The array
+     * of query parts.
+     *
+     * @var array
+     */
+    protected $parts = [
+
+        'select'   => [],
+        'distinct' => false,
+        'from'     => null,
+        'where'    => [],
+        'orderBy'  => [],
+        'limit'    => null,
+        'into'     => null,
+        'values'   => [],
+        'update'   => null,
+        'set'      => []
+
+    ];
+
+    /**
+     * Invoke a query statement.
+     *
+     * @param int $statement
+     * @return void
+     */
+    protected function invokeStatement(int $statement): void
+    {
+        $this->statement = $statement;
+
+        $this->parts['select']   = [];
+        $this->parts['distinct'] = false;
+        $this->parts['from']     = null;
+        $this->parts['where']    = [];
+        $this->parts['orderBy']  = [];
+        $this->parts['limit']    = null;
+        $this->parts['into']     = null;
+        $this->parts['values']   = [];
+        $this->parts['update']   = null;
+        $this->parts['set']      = [];
+    }
 }
