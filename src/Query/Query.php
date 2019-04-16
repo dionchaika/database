@@ -14,22 +14,22 @@ namespace Dionchaika\Database\Query;
 class Query
 {
     /**
-     * The query SELECT statement type.
+     * The query SELECT type.
      */
     const TYPE_SELECT = 0;
 
     /**
-     * The query INSERT statement type.
+     * The query INSERT type.
      */
     const TYPE_INSERT = 1;
 
     /**
-     * The query UPDATE statement type.
+     * The query UPDATE type.
      */
     const TYPE_UPDATE = 2;
 
     /**
-     * The query DELETE statement type.
+     * The query DELETE type.
      */
     const TYPE_DELETE = 3;
 
@@ -41,7 +41,7 @@ class Query
     protected $compiler;
 
     /**
-     * The query statement type.
+     * The query type.
      *
      * @var int
      */
