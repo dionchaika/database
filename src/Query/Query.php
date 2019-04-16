@@ -147,6 +147,51 @@ class Query
     }
 
     /**
+     * Add a query ORDER BY clause.
+     *
+     * @param mixed $columnNames
+     * @return self
+     */
+    public function orderBy($columnNames): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
+
+        $this->parts['orderBy'][] = $this->compileOrderBy($columnNames, 'ASC');
+        return $this;
+    }
+
+    /**
+     * Add a query ORDER BY DESC clause.
+     *
+     * @param mixed $columnNames
+     * @return self
+     */
+    public function orderByDesc($columnNames): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
+
+        $this->parts['orderBy'][] = $this->compileOrderBy($columnNames, 'DESC');
+        return $this;
+    }
+
+    /**
+     * Set a query LIMIT clause.
+     *
+     * @param int $count
+     * @param int|null $offset
+     * @return self
+     */
+    public function limit(int $count, ?int $offset = null): self
+    {
+        $this->parts['limit'] = $this->compiler->compileLimit($count, $offset);
+        return $this;
+    }
+
+    /**
      * Get the query SQL.
      *
      * @return string
