@@ -66,6 +66,45 @@ class Query
     ];
 
     /**
+     * Invoke a query
+     * SELECT statement.
+     *
+     * @param mixed|null $columnNames
+     * @return self
+     */
+    public function select($columnNames = null): self
+    {
+        $this->invokeStatement(self::STATEMENT_SELECT);
+
+        if (null !== $columnNames) {
+            $columnNames = is_array($columnNames)
+                ? $columnNames
+                : func_get_args();
+
+            $this->parts['select'] = array_merge(
+                $this->parts['select'], $columnNames
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Invoke a query
+     * SELECT statement.
+     *
+     * @param mixed $expression
+     * @return self
+     */
+    public function selectRaw($expression): self
+    {
+        $this->invokeStatement(self::STATEMENT_SELECT);
+        $this->parts['select'][] = new Raw($expression);
+
+        return $this;
+    }
+
+    /**
      * Invoke a query statement.
      *
      * @param int $statement
