@@ -45,7 +45,7 @@ class Query
      *
      * @var int
      */
-    protected $type;
+    protected $type = Query::TYPE_SELECT;
 
     /**
      * The array of query parts.
@@ -70,5 +70,27 @@ class Query
     public function __construct(CompilerInterface $compiler)
     {
         $this->compiler = $compiler;
+    }
+
+    /**
+     * Invoke the query SELECT statement.
+     *
+     * @param mixed|null $columnNames
+     * @return $this
+     */
+    public function select($columnNames = null): Query
+    {
+        if (null !== $columnNames) {
+            $columnNames = is_array($columnNames)
+                ? $columnNames
+                : func_get_args();
+
+            foreach ($columnNames as $columnName) {
+                $this->parts['select']
+                    = $this->compiler->compileName($columnName);
+            }
+        }
+
+        return $this;
     }
 }

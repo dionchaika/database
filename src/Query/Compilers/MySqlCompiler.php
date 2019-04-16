@@ -11,7 +11,9 @@
 
 namespace Dionchaika\Database\Query\Compilers;
 
-class MySqlCompiler
+use Dionchaika\Database\Query\CompilerInterface;
+
+class MySqlCompiler implements CompilerInterface
 {
     /**
      * Quote an SQL name.
