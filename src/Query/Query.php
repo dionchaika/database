@@ -86,7 +86,7 @@ class Query
                 : func_get_args();
 
             foreach ($columnNames as $columnName) {
-                $this->parts['select']
+                $this->parts['select'][]
                     = $this->compiler->compileName($columnName);
             }
         }
