@@ -134,31 +134,4 @@ class MySqlCompiler implements CompilerInterface
 
         return $this->quoteString($value);
     }
-
-    /**
-     * Compile the SELECT statement.
-     *
-     * Grammar:
-     *      SELECT[ DISTINCT]
-     *          sql_name_components[ AS `sql_name`]|raw_sql([, sql_name_components[ AS `sql_name`]]|raw_sql)*
-     *      FROM sql_name_components[ AS `sql_name`]|raw_sql.
-     *
-     * @param array $parts
-     * @return string
-     */
-    public function compileSelect(array $parts): string
-    {
-        if (null === $parts['from']) {
-            return '';
-        }
-
-        if (empty($parts['select'])) {
-            $parts['select'][] = '*';
-        }
-
-        $sql = $parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT';
-        $sql .= ' '.implode(', ', $parts['select']).' FROM '.$parts['from'];
-
-        return $sql.';';
-    }
 }
