@@ -43,26 +43,4 @@ class Query
      * @var int
      */
     protected $statement = self::STATEMENT_SELECT;
-
-    /**
-     * The array
-     * of query bindings.
-     *
-     * @var array
-     */
-    protected $bindings = [];
-
-    /**
-     * Bind a query parameter.
-     *
-     * @param int|string $parameter
-     * @param mixed $value
-     * @return self
-     */
-    public function bindParameter($parameter, &$value): self
-    {
-        //
-
-        return $this;
-    }
 }
