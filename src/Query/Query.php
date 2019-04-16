@@ -174,8 +174,8 @@ class Query
 
             $this->parts['orderBy'][] = [
 
-                'colums' => $columnNames,
-                'direction'    => $direction
+                'colums'    => $columnNames,
+                'direction' => $direction
 
             ];
         }
