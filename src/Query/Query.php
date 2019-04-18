@@ -145,17 +145,39 @@ class Query
     }
 
     /**
-     * @param string $expression
-     * @param string $delimiter
+     * @param mixed      $columnName
+     * @param mixed|null $operator
+     * @param mixed|null $value
+     * @param string     $delimiter
      * @return self
      */
-    public function whereRaw(string $expression, string $delimiter = 'AND'): self
-    {
-        if (!empty($this->parts['where'])) {
-            $expression = $delimiter.' '.$expression;
+    public function where(
+        $columnName,
+        $operator = null,
+        $value = null,
+        $delimiter = 'AND'
+    ): self {
+        if (
+            null === $operator &&
+            null === $value
+        ) {
+            $operator = 'IS NOT';
+        } else if (
+            null !== $operator &&
+            null === $value
+        ) {
+            $value = $operator;
+        } else {
+            $operator = strtoupper($operator);
         }
 
-        $this->parts['where'][] = $expression;
+        $contition = $this->compileName($columnName).' '.$operator.' '.$this->compileValue($value);
+
+        if (!empty($this->parts['where'])) {
+            $contition = $delimiter.' '.$contition;
+        }
+
+        $this->parts['where'][] = $contition;
         return $this;
     }
 
