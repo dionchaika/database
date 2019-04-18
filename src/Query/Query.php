@@ -371,6 +371,14 @@ class Query
     }
 
     /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getSql();
+    }
+
+    /**
      * @param int $type
      * @return void
      */
@@ -473,5 +481,85 @@ class Query
         }
 
         return $aggregate;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSqlForSelect(): string
+    {
+        if (null === $this->parts['from']) {
+            return '';
+        }
+
+        if (empty($this->parts['select'])) {
+            $this->parts['select'][] = '*';
+        }
+
+        $sql = $this->parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT'
+            .' '.implode(', ', $this->parts['select']).' FROM '.$this->parts['from'];
+
+        if (!empty($this->parts['where'])) {
+            $sql .= ' WHERE '.implode(' ', $this->parts['where']);
+        }
+
+        if (!empty($this->parts['orderBy'])) {
+            $sql .= ' ORDER BY '.implode(', ', $this->parts['orderBy']);
+        }
+
+        if (null !== $this->parts['limit']) {
+            $sql .= ' LIMIT '.$this->parts['limit'];
+        }
+
+        return $sql.';';
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSqlForInsert(): string
+    {
+        $sql = 'INSERT INTO '.$this->parts['into']
+            .' ('.implode(', ', array_keys($this->parts['values'])).')'
+            .' VALUES ('.implode(', ', array_values($this->parts['values'])).')';
+
+        return $sql.';';
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSqlForUpdate(): string
+    {
+        if (empty($this->parts['set'])) {
+            return '';
+        }
+
+        $set = [];
+        foreach ($this->parts['set'] as $key => $value) {
+            $set[] = $key.' = '.$value;
+        }
+
+        $sql = 'UPDATE '.$this->parts['update'].' SET '.implode(', ', $set);
+
+        if (!empty($this->parts['where'])) {
+            $sql .= ' WHERE '.implode(' ', $this->parts['where']);
+        }
+
+        return $sql.';';
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSqlForDelete(): string
+    {
+        $sql = 'DELETE FROM '.$this->parts['from'];
+
+        if (!empty($this->parts['where'])) {
+            $sql .= ' WHERE '.implode(' ', $this->parts['where']);
+        }
+
+        return $sql.';';
     }
 }
