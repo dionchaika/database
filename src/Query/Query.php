@@ -7,6 +7,13 @@ class Query
     const TYPE_UPDATE = 2;
     const TYPE_DELETE = 3;
 
+    const ORDER_ASC = 'ASC';
+    const ORDER_DESC = 'DESC';
+
+    const CRITERIA_CONTAINS = 0;
+    const CRITERIA_ENDS_WITH = 1;
+    const CRITERIA_STARTS_WITH = 2;
+
     /**
      * @var int
      */
@@ -164,17 +171,19 @@ class Query
         ) {
             $value = $operator;
             $operator = '=';
-        } else {
-            $operator = strtoupper($operator);
+        } else if (
+            null === $operator &&
+            null !== $value
+        ) {
+            $operator = '=';
         }
 
-        $contition = $this->compileName($columnName).' '.$operator.' '.$this->compileValue($value);
-
+        $condition = $this->compileName($columnName).' '.$operator.' '.$this->compileValue($value);
         if (!empty($this->parts['where'])) {
-            $contition = $delimiter.' '.$contition;
+            $condition = $delimiter.' '.$condition;
         }
 
-        $this->parts['where'][] = $contition;
+        $this->parts['where'][] = $condition;
         return $this;
     }
 
@@ -184,11 +193,8 @@ class Query
      * @param mixed|null $value
      * @return self
      */
-    public function orWhere(
-        $columnName,
-        $operator = null,
-        $value = null
-    ): self {
+    public function orWhere($columnName, $operator = null, $value = null): self
+    {
         return $this->where($columnName, $operator, $value, 'OR');
     }
 
@@ -198,12 +204,77 @@ class Query
      * @param mixed|null $value
      * @return self
      */
-    public function andWhere(
-        $columnName,
-        $operator = null,
-        $value = null
-    ): self {
+    public function andWhere($columnName, $operator = null, $value = null): self
+    {
         return $this->where($columnName, $operator, $value, 'AND');
+    }
+
+    /**
+     * @param mixed  $columnName
+     * @param string $delimiter
+     * @return self
+     */
+    public function whereIsNull($columnName, string $delimiter = 'AND'): self
+    {
+        $condition = $this->compileName($columnName).' IS NULL';
+        if (!empty($this->parts['where'])) {
+            $condition = $delimiter.' '.$condition;
+        }
+
+        $this->parts['where'][] = $condition;
+        return $this;
+    }
+
+    /**
+     * @param mixed $columnName
+     * @return self
+     */
+    public function orWhereIsNull($columnName): self
+    {
+        return $this->whereIsNull($columnName, 'OR');
+    }
+
+    /**
+     * @param mixed $columnName
+     * @return self
+     */
+    public function andWhereIsNull($columnName): self
+    {
+        return $this->whereIsNull($columnName, 'AND');
+    }
+
+    /**
+     * @param mixed  $columnName
+     * @param string $delimiter
+     * @return self
+     */
+    public function whereIsNotNull($columnName, string $delimiter = 'AND'): self
+    {
+        $condition = $this->compileName($columnName).' IS NOT NULL';
+        if (!empty($this->parts['where'])) {
+            $condition = $delimiter.' '.$condition;
+        }
+
+        $this->parts['where'][] = $condition;
+        return $this;
+    }
+
+    /**
+     * @param mixed $columnName
+     * @return self
+     */
+    public function orWhereIsNotNull($columnName): self
+    {
+        return $this->whereIsNotNull($columnName, 'OR');
+    }
+
+    /**
+     * @param mixed $columnName
+     * @return self
+     */
+    public function andWhereIsNotNull($columnName): self
+    {
+        return $this->whereIsNotNull($columnName, 'AND');
     }
 
     /**
@@ -246,13 +317,28 @@ class Query
     }
 
     /**
-     * @param mixed  $columnName
-     * @param mixed  $value
-     * @param string $delimiter
+     * @param mixed    $columnName
+     * @param mixed    $value
+     * @param int|null $criteria
+     * @param string   $delimiter
      * @return self
      */
-    public function whereLike($columnName, $value, string $delimiter = 'AND'): self
+    public function whereLike($columnName, $value, ?int $criteria = null, string $delimiter = 'AND'): self
     {
+        if (null !== $criteria) {
+            switch ($criteria) {
+                case self::CRITERIA_CONTAINS:
+                    $value = '%'.$value.'%';
+                    break;
+                case self::CRITERIA_ENDS_WITH:
+                    $value = '%'.$value;
+                    break;
+                case self::CRITERIA_STARTS_WITH:
+                    $value = $value.'%';
+                    break;
+            }
+        }
+
         $condition = $this->compileName($columnName).' LIKE '
             .$this->compileValue($value);
 
@@ -265,23 +351,25 @@ class Query
     }
 
     /**
-     * @param mixed $columnName
-     * @param mixed $value
+     * @param mixed    $columnName
+     * @param mixed    $value
+     * @param int|null $criteria
      * @return self
      */
-    public function orWhereLike($columnName, $value): self
+    public function orWhereLike($columnName, $value, ?int $criteria = null): self
     {
-        return $this->whereLike($columnName, $value, 'OR');
+        return $this->whereLike($columnName, $value, $criteria, 'OR');
     }
 
     /**
-     * @param mixed $columnName
-     * @param mixed $value
+     * @param mixed    $columnName
+     * @param mixed    $value
+     * @param int|null $criteria
      * @return self
      */
-    public function andWhereLike($columnName, $value): self
+    public function andWhereLike($columnName, $value, ?int $criteria = null): self
     {
-        return $this->whereLike($columnName, $value, 'AND');
+        return $this->whereLike($columnName, $value, $criteria, 'AND');
     }
 
     /**
@@ -327,11 +415,44 @@ class Query
     }
 
     /**
+     * @param string $expression
+     * @param string $delimiter
+     * @return self
+     */
+    public function whereRaw(string $expression, string $delimiter = 'AND'): self
+    {
+        if (!empty($this->parts['where'])) {
+            $expression = $delimiter.' '.$expression;
+        }
+
+        $this->parts['where'][] = $expression;
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function orWhereRaw(string $expression): self
+    {
+        return $this->whereRaw($expression, 'OR');
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function andWhereRaw(string $expression): self
+    {
+        return $this->whereRaw($expression, 'AND');
+    }
+
+    /**
      * @param mixed[]|mixed $columnNames
      * @param string        $order
      * @return self
      */
-    public function orderBy($columnNames, string $order = 'ASC'): self
+    public function orderBy($columnNames, string $order = self::ORDER_ASC): self
     {
         $columnNames = is_array($columnNames)
             ? $columnNames
@@ -340,16 +461,6 @@ class Query
         $this->parts['orderBy'][]
             = implode(', ', array_map(['static', 'compileName'], $columnNames)).' '.$order;
 
-        return $this;
-    }
-
-    /**
-     * @param string $expression
-     * @return self
-     */
-    public function orderByRaw(string $expression): self
-    {
-        $this->parts['orderBy'][] = $expression;
         return $this;
     }
 
@@ -363,7 +474,7 @@ class Query
             ? $columnNames
             : func_get_args();
 
-        return $this->orderBy($columnNames, 'ASC');
+        return $this->orderBy($columnNames, self::ORDER_ASC);
     }
 
     /**
@@ -376,7 +487,17 @@ class Query
             ? $columnNames
             : func_get_args();
 
-        return $this->orderBy($columnNames, 'DESC');
+        return $this->orderBy($columnNames, self::ORDER_DESC);
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function orderByRaw(string $expression): self
+    {
+        $this->parts['orderBy'][] = $expression;
+        return $this;
     }
 
     /**
@@ -593,9 +714,13 @@ class Query
     {
         $name = (string)$name;
 
-        [$name, $alias] = preg_split('/\s+as\s+/i', $name, 2);
-        $name = implode('.', array_map(['static', 'quoteName'], preg_split('/\s*\.\s*/', $name, 3)));
+        if (preg_match('/\s+as\s+/i', $name)) {
+            [$name, $alias] = array_filter(preg_split('/\s+as\s+/i', $name, 2));
+        } else {
+            $alias = null;
+        }
 
+        $name = implode('.', array_map(['static', 'quoteName'], preg_split('/\s*\.\s*/', $name, 3)));
         if (!empty($alias)) {
             $name .= ' AS '.$this->quoteName($alias);
         }
@@ -663,7 +788,7 @@ class Query
             $this->parts['select'][] = '*';
         }
 
-        $sql = $this->parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT'
+        $sql = ($this->parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT')
             .' '.implode(', ', $this->parts['select']).' FROM '.$this->parts['from'];
 
         if (!empty($this->parts['where'])) {
