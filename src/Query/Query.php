@@ -1,56 +1,19 @@
 <?php
 
-/**
- * The PHP Database Library.
- *
- * @package dionchaika/database
- * @version 1.0.0
- * @license MIT
- * @author Dion Chaika <dionchaika@gmail.com>
- */
-
-namespace Dionchaika\Database\Query;
-
-use Throwable;
-
 class Query
 {
-    /**
-     * The query
-     * SELECT statement.
-     */
-    const STATEMENT_SELECT = 0;
+    const TYPE_SELECT = 0;
+    const TYPE_INSERT = 1;
+    const TYPE_UPDATE = 2;
+    const TYPE_DELETE = 3;
 
     /**
-     * The query
-     * INSERT statement.
-     */
-    const STATEMENT_INSERT = 1;
-
-    /**
-     * The query
-     * UPDATE statement.
-     */
-    const STATEMENT_UPDATE = 2;
-
-    /**
-     * The query
-     * DELETE statement.
-     */
-    const STATEMENT_DELETE = 3;
-
-    /**
-     * The query statement.
-     *
      * @var int
      */
-    protected $statement = self::STATEMENT_SELECT;
+    protected $type = self::TYPE_SELECT;
 
     /**
-     * The array
-     * of query parts.
-     *
-     * @var array
+     * @var mixed[]
      */
     protected $parts = [
 
@@ -68,65 +31,36 @@ class Query
     ];
 
     /**
-     * The query compiler.
-     *
-     * @var \Dionchaika\Database\Query\CompilerInterface
-     */
-    protected $compiler;
-
-    /**
-     * @param \Dionchaika\Database\Query\CompilerInterface $compiler
-     */
-    public function __construct(CompilerInterface $compiler)
-    {
-        $this->compiler = $compiler;
-    }
-
-    /**
-     * Invoke a query
-     * SELECT statement.
-     *
-     * @param mixed|null $columnNames
+     * @param mixed $columnNames
      * @return self
-     * @throws \InvalidArgumentException
      */
-    public function select($columnNames = null): self
+    public function select($columnNames = '*'): self
     {
-        $this->invokeStatement(self::STATEMENT_SELECT);
+        $this->setType(self::TYPE_SELECT);
 
-        if (null !== $columnNames) {
-            $columnNames = is_array($columnNames)
-                ? $columnNames
-                : func_get_args();
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
 
-            foreach ($columnNames as $columnName) {
-                $this->parts['select'][]
-                    = $this->compiler->compileName($columnName);
-            }
-        }
+        $this->parts['select']
+            = array_map(['static', 'compileName'], $columnNames);
 
         return $this;
     }
 
     /**
-     * Invoke a query
-     * SELECT statement.
-     *
      * @param string $expression
      * @return self
      */
     public function selectRaw(string $expression): self
     {
-        $this->invokeStatement(self::STATEMENT_SELECT);
-        $this->parts['select'][] = $expression;
+        $this->setType(self::TYPE_SELECT);
+        $this->parts['select'] = $expression;
 
         return $this;
     }
 
     /**
-     * Make a query
-     * SELECT statement distinct.
-     *
      * @return self
      */
     public function distinct(): self
@@ -136,21 +70,71 @@ class Query
     }
 
     /**
-     * Set a query table.
-     *
-     * @param mixed $tableName
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
      * @return self
-     * @throws \InvalidArgumentException
      */
-    public function from($tableName): self
+    public function min($columnName = '*', $aliasName = null): self
     {
-        $this->parts['from'] = $this->compiler->compileName($tableName);
+        $this->parts['select'][] = $this->compileAggregate('MIN', $columnName, $aliasName);
         return $this;
     }
 
     /**
-     * Set a query table.
-     *
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
+    public function max($columnName = '*', $aliasName = null): self
+    {
+        $this->parts['select'][] = $this->compileAggregate('MAX', $columnName, $aliasName);
+        return $this;
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
+    public function avg($columnName = '*', $aliasName = null): self
+    {
+        $this->parts['select'][] = $this->compileAggregate('AVG', $columnName, $aliasName);
+        return $this;
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
+    public function sum($columnName = '*', $aliasName = null): self
+    {
+        $this->parts['select'][] = $this->compileAggregate('SUM', $columnName, $aliasName);
+        return $this;
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
+    public function count($columnName = '*', $aliasName = null): self
+    {
+        $this->parts['select'][] = $this->compileAggregate('COUNT', $columnName, $aliasName);
+        return $this;
+    }
+
+    /**
+     * @param mixed $tableName
+     * @return self
+     */
+    public function from($tableName): self
+    {
+        $this->parts['from'] = $this->compileName($tableName);
+        return $this;
+    }
+
+    /**
      * @param string $expression
      * @return self
      */
@@ -161,25 +145,38 @@ class Query
     }
 
     /**
-     * Add a query ORDER BY (ASC) clause.
-     *
-     * @param mixed $columnNames
+     * @param string $expression
+     * @param string $delimiter
      * @return self
-     * @throws \InvalidArgumentException
      */
-    public function orderBy($columnNames): self
+    public function whereRaw(string $expression, string $delimiter = 'AND'): self
     {
-        $columnNames = is_array($columnNames)
-            ? $columnNames
-            : func_get_args();
+        if (!empty($this->parts['where'])) {
+            $expression = $delimiter.' '.$expression;
+        }
 
-        $this->parts['orderBy'][] = $this->compiler->compileOrderBy($columnNames, 'ASC');
+        $this->parts['where'][] = $expression;
         return $this;
     }
 
     /**
-     * Add a query ORDER BY clause.
-     *
+     * @param mixed[]|mixed $columnNames
+     * @param string        $order
+     * @return self
+     */
+    public function orderBy($columnNames, string $order = 'ASC'): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : [$columnNames];
+
+        $this->parts['orderBy'][]
+            = implode(', ', array_map(['static', 'compileName'], $columnNames)).' '.$order;
+
+        return $this;
+    }
+
+    /**
      * @param string $expression
      * @return self
      */
@@ -190,11 +187,21 @@ class Query
     }
 
     /**
-     * Add a query ORDER BY (DESC) clause.
-     *
      * @param mixed $columnNames
      * @return self
-     * @throws \InvalidArgumentException
+     */
+    public function orderByAsc($columnNames): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
+
+        return $this->orderBy($columnNames, 'ASC');
+    }
+
+    /**
+     * @param mixed $columnNames
+     * @return self
      */
     public function orderByDesc($columnNames): self
     {
@@ -202,27 +209,21 @@ class Query
             ? $columnNames
             : func_get_args();
 
-        $this->parts['orderBy'][] = $this->compiler->compileOrderBy($columnNames, 'DESC');
-        return $this;
+        return $this->orderBy($columnNames, 'DESC');
     }
 
     /**
-     * Set a query LIMIT clause.
-     *
      * @param int      $count
      * @param int|null $offset
      * @return self
-     * @throws \InvalidArgumentException
      */
     public function limit(int $count, ?int $offset = null): self
     {
-        $this->parts['limit'] = $this->compiler->compileLimit($count, $offset);
+        $this->parts['limit'] = (null === $offset) ? $count : $offset.', '.$count;
         return $this;
     }
 
     /**
-     * Set a query LIMIT clause.
-     *
      * @param string $expression
      * @return self
      */
@@ -233,46 +234,149 @@ class Query
     }
 
     /**
-     * Get the query SQL.
-     *
+     * @param mixed $tableName
+     * @return self
+     */
+    public function insert($tableName): self
+    {
+        $this->setType(self::TYPE_INSERT);
+        $this->parts['into'] = $this->compileName($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function insertRaw(string $expression): self
+    {
+        $this->setType(self::TYPE_INSERT);
+        $this->parts['into'] = $expression;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed[] $values
+     * @return self
+     */
+    public function values(array $values): self
+    {
+        $this->parts['values'] = array_combine(
+            array_map(['static', 'compileName'], array_keys($values)),
+            array_map(['static', 'compileValue'], array_values($values))
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function valuesRaw(string $expression): self
+    {
+        $this->parts['values'][] = $expression;
+        return $this;
+    }
+
+    /**
+     * @param mixed $tableName
+     * @return self
+     */
+    public function update($tableName): self
+    {
+        $this->setType(self::TYPE_UPDATE);
+        $this->parts['update'] = $this->compileName($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function updateRaw(string $expression): self
+    {
+        $this->setType(self::TYPE_UPDATE);
+        $this->parts['update'] = $expression;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed[] $values
+     * @return self
+     */
+    public function set(array $values): self
+    {
+        $this->parts['set'] = array_combine(
+            array_map(['static', 'compileName'], array_keys($values)),
+            array_map(['static', 'compileValue'], array_values($values))
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function setRaw(string $expression): self
+    {
+        $this->parts['set'][] = $expression;
+        return $this;
+    }
+
+    /**
+     * @param mixed $tableName
+     * @return self
+     */
+    public function delete($tableName): self
+    {
+        $this->setType(self::TYPE_DELETE);
+        $this->parts['from'] = $this->compileName($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function deleteRaw(string $expression): self
+    {
+        $this->setType(self::TYPE_UPDATE);
+        $this->parts['from'] = $expression;
+
+        return $this;
+    }
+
+    /**
      * @return string
-     * @throws \InvalidArgumentException
      */
     public function getSql(): string
     {
-        $sql = '';
-
-        if ($this->statement === self::STATEMENT_SELECT) {
-            $sql .= $this->compiler->compileSelect($this->parts);
-        }
-
-        return $sql;
-    }
-
-    /**
-     * Get the string
-     * representation of the query.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        try {
-            return $this->getSql();
-        } catch (Throwable $e) {
-            return '';
+        switch ($this->type) {
+            case self::TYPE_SELECT:
+                return $this->getSqlForSelect();
+            case self::TYPE_INSERT:
+                return $this->getSqlForInsert();
+            case self::TYPE_UPDATE:
+                return $this->getSqlForUpdate();
+            case self::TYPE_DELETE:
+                return $this->getSqlForDelete();
         }
     }
 
     /**
-     * Invoke a query statement.
-     *
-     * @param int $statement
+     * @param int $type
      * @return void
      */
-    protected function invokeStatement(int $statement): void
+    protected function setType(int $type): void
     {
-        $this->statement = $statement;
+        $this->type = $type;
 
         $this->parts['select']   = [];
         $this->parts['distinct'] = false;
@@ -284,5 +388,90 @@ class Query
         $this->parts['values']   = [];
         $this->parts['update']   = null;
         $this->parts['set']      = [];
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    protected function quoteName(string $name): string
+    {
+        return ('*' === $name)
+            ? $name
+            : '`'.str_replace('`', '\\`', $name).'`';
+    }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    protected function quoteString(string $string): string
+    {
+        return '\''.str_replace('\'', '\\\'', $string).'\'';
+    }
+
+    /**
+     * @param mixed $name
+     * @return string
+     */
+    protected function compileName($name): string
+    {
+        $name = (string)$name;
+
+        [$name, $alias] = preg_split('/\s+as\s+/i', $name, 2);
+        $name = implode('.', array_map(['static', 'quoteName'], preg_split('/\s*\.\s*/', $name, 3)));
+
+        if (!empty($alias)) {
+            $name .= ' AS '.$this->quoteName($alias);
+        }
+
+        return $name;
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    protected function compileValue($value): string
+    {
+        if (null === $value) {
+            return 'NULL';
+        }
+
+        if (true === $value) {
+            return 'TRUE';
+        }
+
+        if (false === $value) {
+            return 'FALSE';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return $value;
+        }
+
+        $value = (string)$value;
+
+        if ('?' === $value || 0 === strpos($value, ':')) {
+            return $value;
+        }
+
+        return $this->quoteString($value);
+    }
+
+    /**
+     * @param string     $name
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return string
+     */
+    protected function compileAggregate(string $name, $columnName, $aliasName = null): string
+    {
+        $aggregate = $name.'('.$this->compileName($columnName).')';
+        if (null !== $aliasName) {
+            $aggregate .= ' AS '.$this->compileName($aliasName);
+        }
+
+        return $aggregate;
     }
 }
