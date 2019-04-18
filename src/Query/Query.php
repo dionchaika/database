@@ -151,12 +151,8 @@ class Query
      * @param string     $delimiter
      * @return self
      */
-    public function where(
-        $columnName,
-        $operator = null,
-        $value = null,
-        $delimiter = 'AND'
-    ): self {
+    public function where($columnName, $operator = null, $value = null, string $delimiter = 'AND'): self
+    {
         if (
             null === $operator &&
             null === $value
@@ -180,6 +176,154 @@ class Query
 
         $this->parts['where'][] = $contition;
         return $this;
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $operator
+     * @param mixed|null $value
+     * @return self
+     */
+    public function orWhere(
+        $columnName,
+        $operator = null,
+        $value = null
+    ): self {
+        return $this->where($columnName, $operator, $value, 'OR');
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $operator
+     * @param mixed|null $value
+     * @return self
+     */
+    public function andWhere(
+        $columnName,
+        $operator = null,
+        $value = null
+    ): self {
+        return $this->where($columnName, $operator, $value, 'AND');
+    }
+
+    /**
+     * @param mixed  $columnName
+     * @param array  $values
+     * @param string $delimiter
+     * @return self
+     */
+    public function whereIn($columnName, array $values, string $delimiter = 'AND'): self
+    {
+        $condition = $this->compileName($columnName).' IN '
+            .'('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
+
+        if (!empty($this->parts['where'])) {
+            $condition = $delimiter.' '.$condition;
+        }
+
+        $this->parts['where'][] = $condition;
+        return $this;
+    }
+
+    /**
+     * @param mixed $columnName
+     * @param array $values
+     * @return self
+     */
+    public function orWhereIn($columnName, array $values): self
+    {
+        return $this->whereIn($columnName, $values, 'OR');
+    }
+
+    /**
+     * @param mixed $columnName
+     * @param array $values
+     * @return self
+     */
+    public function andWhereIn($columnName, array $values): self
+    {
+        return $this->whereIn($columnName, $values, 'AND');
+    }
+
+    /**
+     * @param mixed  $columnName
+     * @param mixed  $value
+     * @param string $delimiter
+     * @return self
+     */
+    public function whereLike($columnName, $value, string $delimiter = 'AND'): self
+    {
+        $condition = $this->compileName($columnName).' LIKE '
+            .$this->compileValue($value);
+
+        if (!empty($this->parts['where'])) {
+            $condition = $delimiter.' '.$condition;
+        }
+
+        $this->parts['where'][] = $condition;
+        return $this;
+    }
+
+    /**
+     * @param mixed $columnName
+     * @param mixed $value
+     * @return self
+     */
+    public function orWhereLike($columnName, $value): self
+    {
+        return $this->whereLike($columnName, $value, 'OR');
+    }
+
+    /**
+     * @param mixed $columnName
+     * @param mixed $value
+     * @return self
+     */
+    public function andWhereLike($columnName, $value): self
+    {
+        return $this->whereLike($columnName, $value, 'AND');
+    }
+
+    /**
+     * @param mixed  $columnName
+     * @param mixed  $minValue
+     * @param mixed  $maxValue
+     * @param string $delimiter
+     * @return self
+     */
+    public function whereBetween($columnName, $minValue, $maxValue, string $delimiter = 'AND'): self
+    {
+        $condition = $this->compileName($columnName).' BETWEEN '
+            .$this->compileValue($minValue).' AND '.$this->compileValue($maxValue);
+
+        if (!empty($this->parts['where'])) {
+            $condition = $delimiter.' '.$condition;
+        }
+
+        $this->parts['where'][] = $condition;
+        return $this;
+    }
+
+    /**
+     * @param mixed $columnName
+     * @param mixed $minValue
+     * @param mixed $maxValue
+     * @return self
+     */
+    public function orWhereBetween($columnName, $minValue, $maxValue): self
+    {
+        return $this->whereBetween($columnName, $minValue, $maxValue, 'OR');
+    }
+
+    /**
+     * @param mixed $columnName
+     * @param mixed $minValue
+     * @param mixed $maxValue
+     * @return self
+     */
+    public function andWhereBetween($columnName, $minValue, $maxValue): self
+    {
+        return $this->whereBetween($columnName, $minValue, $maxValue, 'AND');
     }
 
     /**
