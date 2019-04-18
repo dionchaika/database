@@ -167,6 +167,7 @@ class Query
             null === $value
         ) {
             $value = $operator;
+            $operator = '=';
         } else {
             $operator = strtoupper($operator);
         }
