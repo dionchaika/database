@@ -279,7 +279,7 @@ class Query
 
     /**
      * @param mixed  $columnName
-     * @param array  $values
+     * @param mixed[]  $values
      * @param string $delimiter
      * @return self
      */
@@ -298,7 +298,7 @@ class Query
 
     /**
      * @param mixed $columnName
-     * @param array $values
+     * @param mixed[] $values
      * @return self
      */
     public function orWhereIn($columnName, array $values): self
@@ -308,7 +308,7 @@ class Query
 
     /**
      * @param mixed $columnName
-     * @param array $values
+     * @param mixed[] $values
      * @return self
      */
     public function andWhereIn($columnName, array $values): self
