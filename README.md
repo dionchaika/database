@@ -3,7 +3,7 @@ The PHP Database Library
 
 ## 1. Requirements
 1. PHP 7
-2. PDO or MySQLi extention
+2. PDO
 
 ## 2. Installation
 ```bash
