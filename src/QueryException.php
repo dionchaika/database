@@ -3,7 +3,7 @@
 /**
  * The PHP Database Library.
  *
- * @package dionchaika/http
+ * @package dionchaika/database
  * @version 1.0.0
  * @license MIT
  * @author Dion Chaika <dionchaika@gmail.com>
