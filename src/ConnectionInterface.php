@@ -1,12 +1,19 @@
 <?php
 
+/**
+ * The PHP Database Library.
+ *
+ * @package dionchaika/http
+ * @version 1.0.0
+ * @license MIT
+ * @author Dion Chaika <dionchaika@gmail.com>
+ */
+
 namespace Dionchaika\Database;
 
 interface ConnectionInterface
 {
     /**
-     * Execute an SQL query.
-     *
      * @param string $sql
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
@@ -14,8 +21,6 @@ interface ConnectionInterface
     public function query(string $sql): void;
 
     /**
-     * Prepare an SQL query.
-     *
      * @param string $sql
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
@@ -23,8 +28,6 @@ interface ConnectionInterface
     public function prepare(string $sql): void;
 
     /**
-     * Execute a prepared SQL query.
-     *
      * @param mixed[] $params
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
@@ -32,43 +35,20 @@ interface ConnectionInterface
     public function execute(array $params = []): void;
 
     /**
-     * Set a positional parameter.
-     *
-     * @param mixed $value
-     * @return void
-     */
-    // public function setPositionalParameter(&$value): void;
-
-    /**
-     * Set a named parameter.
-     *
-     * @param string $name
-     * @param mixed  $value
-     * @return void
-     */
-    // public function setNamedParameter(string $name, &$value): void;
-
-    /**
-     * Fetch all rows as associative arrays.
-     *
      * @return mixed[]
      * @throws \Dionchaika\Database\FetchExceptionInterface
      */
     public function fetchAll(): array;
 
     /**
-     * Fetch last row as associative array.
-     *
-     * @return mixed[]
+     * @return mixed[]|null
      * @throws \Dionchaika\Database\FetchExceptionInterface
      */
-    public function fetchLast(): array;
+    public function fetchLast(): ?array;
 
     /**
-     * Fetch first row as associative array.
-     *
-     * @return mixed[]
+     * @return mixed[]|null
      * @throws \Dionchaika\Database\FetchExceptionInterface
      */
-    public function fetchFirst(): array;
+    public function fetchFirst(): ?array;
 }
