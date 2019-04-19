@@ -1,5 +1,7 @@
 <?php
 
+namespace Dionchaika\Database\Query;
+
 class Query
 {
     const TYPE_SELECT = 0;
@@ -747,7 +749,7 @@ class Query
         }
 
         if (is_int($value) || is_float($value)) {
-            return $value;
+            return (string)$value;
         }
 
         $value = (string)$value;
