@@ -35,10 +35,10 @@ interface ConnectionInterface
     public function execute(array $params = []): void;
 
     /**
-     * @return mixed[]
+     * @return mixed[]|null
      * @throws \Dionchaika\Database\FetchExceptionInterface
      */
-    public function fetchAll(): array;
+    public function fetchAll(): ?array;
 
     /**
      * @return mixed[]|null
