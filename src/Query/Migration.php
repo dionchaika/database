@@ -420,12 +420,12 @@ class Migration
     }
 
     /**
-     * @param int|null $startWith
+     * @param int|null $startsWith
      * @return self
      */
-    public function autoincrement(int $startWith = null): self
+    public function autoincrement(int $startsWith = null): self
     {
-        $autoincrement = $startWith ?? true;
+        $autoincrement = $startsWith ?? true;
 
         if ($this->type === self::TYPE_CREATE_TABLE) {
             $this->columns[count($this->columns) - 1]['autoincrement'] = $autoincrement;
