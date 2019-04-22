@@ -84,6 +84,14 @@ class MySQLiConnection implements ConnectionInterface
     }
 
     /**
+     * @return bool
+     */
+    public function isPrepared(): bool
+    {
+        return $this->prepared;
+    }
+
+    /**
      * @param mixed[] $params
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface

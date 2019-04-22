@@ -28,6 +28,11 @@ interface ConnectionInterface
     public function prepare(string $sql): void;
 
     /**
+     * @return bool
+     */
+    public function isPrepared(): bool;
+
+    /**
      * @param mixed[] $params
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface

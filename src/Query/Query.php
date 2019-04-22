@@ -11,6 +11,9 @@
 
 namespace Dionchaika\Database\Query;
 
+use Dionchaika\Database\QueryException;
+use Dionchaika\Database\ConnectionInterface;
+
 class Query
 {
     const TYPE_SELECT = 0;
@@ -47,6 +50,37 @@ class Query
         'set'      => []
 
     ];
+
+    /**
+     * @var \Dionchaika\Database\ConnectionInterface|null
+     */
+    protected $connection;
+
+    /**
+     * @var mixed[]
+     */
+    protected $parameters = [];
+
+    /**
+     * @var int
+     */
+    protected $parameterNumber = 0;
+
+    /**
+     * @param \Dionchaika\Database\ConnectionInterface|null $connection
+     */
+    public function __construct(?ConnectionInterface $connection = null)
+    {
+        $this->connection = $connection;
+    }
+
+    /**
+     * @return \Dionchaika\Database\ConnectionInterface|null
+     */
+    public function getConnection(): ?ConnectionInterface
+    {
+        return $this->connection;
+    }
 
     /**
      * @param mixed $columnNames
@@ -675,6 +709,88 @@ class Query
     public function __toString(): string
     {
         return $this->getSql();
+    }
+
+    /**
+     * @param mixed $value
+     * @return self
+     */
+    public function setParameter(&$value): self
+    {
+        $this->parameters[$this->parameterNumber] = $value;
+        ++$this->parameterNumber;
+
+        return $this;
+    }
+
+    /**
+     * @param int|string $parameter
+     * @param mixed      $value
+     * @return self
+     */
+    public function bindParameter($parameter, &$value): self
+    {
+        if (is_int($parameter)) {
+            $this->parameters[$parameter] = $value;
+        } else {
+            $this->parameters[':'.ltrim($parameter, ':')] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return \Dionchaika\Database\ConnectionInterface
+     * @throws \Dionchaika\Database\QueryExceptionInterface
+     */
+    public function execute(): ConnectionInterface
+    {
+        if (null === $this->connection) {
+            throw new QueryException(
+                'Missing DB connection!'
+            );
+        }
+
+        if (!$this->connection->isPrepared()) {
+            if (empty($this->parameters)) {
+                $this->connection->query($this->getSql());
+            } else {
+                $this->connection->prepare($this->getSql());
+                $this->connection->execute($this->parameters);
+            }
+        }
+
+        return $this->connection;
+    }
+
+    /**
+     * @return mixed[]
+     * @throws \Dionchaika\Database\QueryExceptionInterface
+     * @throws \Dionchaika\Database\FetchExceptionInterface
+     */
+    public function all(): array
+    {
+        return $this->execute()->fetchAll();
+    }
+
+    /**
+     * @return mixed[]|null
+     * @throws \Dionchaika\Database\QueryExceptionInterface
+     * @throws \Dionchaika\Database\FetchExceptionInterface
+     */
+    public function last(): ?array
+    {
+        return $this->execute()->fetchLast();
+    }
+
+    /**
+     * @return mixed[]|null
+     * @throws \Dionchaika\Database\QueryExceptionInterface
+     * @throws \Dionchaika\Database\FetchExceptionInterface
+     */
+    public function first(): ?array
+    {
+        return $this->execute()->fetchFirst();
     }
 
     /**
