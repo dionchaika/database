@@ -244,9 +244,54 @@ class Migration
     /**
      * @return self
      */
+    public function longText(): self
+    {
+        $this->columns[count($this->columns) - 1] = 'LONGTEXT';
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
     public function tinyText(): self
     {
         $this->columns[count($this->columns) - 1] = 'TINYTEXT';
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function mediumText(): self
+    {
+        $this->columns[count($this->columns) - 1] = 'MEDIUMTEXT';
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function blob(): self
+    {
+        $this->columns[count($this->columns) - 1] = 'BLOB';
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function longBlob(): self
+    {
+        $this->columns[count($this->columns) - 1] = 'LONGBLOB';
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function mediumBlob(): self
+    {
+        $this->columns[count($this->columns) - 1] = 'MEDIUMBLOB';
         return $this;
     }
 
