@@ -613,11 +613,10 @@ class Migration
                 $column .= ' '.$value['constraint'];
             }
 
-            if (null !== $value['autoincrement']) {
+            if (true === $value['autoincrement']) {
                 $column .= ' AUTO_INCREMENT';
-                if (is_int($value['autoincrement'])) {
-                    $column .= ' = '.$value['autoincrement'];
-                }
+            } else if (is_int($value['autoincrement'])) {
+                $column .= ' AUTO_INCREMENT = '.$value['autoincrement'];
             }
 
             $columns[] = $column;
