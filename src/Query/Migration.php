@@ -31,7 +31,8 @@ class Migration
         'drop_table'    => null,
         'if_exists'     => false,
         'create_table'  => null,
-        'if_not_exists' => false
+        'if_not_exists' => false,
+        'primary_key'   => null
 
     ];
 
@@ -111,6 +112,32 @@ class Migration
     }
 
     /**
+     * @param mixed $columnNames
+     * @return self
+     */
+    public function primaryKey($columnNames): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
+
+        $this->parts['primary_key']
+            = implode(', ', array_map(['static', 'compileName'], $columnNames));
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function primaryKeyRaw(string $expression): self
+    {
+        $this->parts['primary_key'] = $expression;
+        return $this;
+    }
+
+    /**
      * @param mixed $columnName
      * @return self
      */
@@ -120,7 +147,8 @@ class Migration
 
             'name'          => $this->compileName($columnName),
             'data_type'     => null,
-            'constraint'    => null,
+            'not_null'      => null,
+            'default'       => null,
             'autoincrement' => false
 
         ];
@@ -138,7 +166,8 @@ class Migration
 
             'name'          => $expression,
             'data_type'     => '',
-            'constraint'    => '',
+            'not_null'      => null,
+            'default'       => null,
             'autoincrement' => false
 
         ];
@@ -395,7 +424,7 @@ class Migration
      */
     public function notNull(): self
     {
-        $this->columns[count($this->columns) - 1]['constraint'] = 'NOT NULL';
+        $this->columns[count($this->columns) - 1]['not_null'] = true;
         return $this;
     }
 
@@ -405,7 +434,7 @@ class Migration
      */
     public function default($value): self
     {
-        $this->columns[count($this->columns) - 1]['constraint'] = 'DEFAULT '.$this->compileValue($value);
+        $this->columns[count($this->columns) - 1]['default'] = $this->compileValue($value);
         return $this;
     }
 
@@ -415,7 +444,7 @@ class Migration
      */
     public function defaultRaw(string $expression): self
     {
-        $this->columns[count($this->columns) - 1]['constraint'] = 'DEFAULT '.$expression;
+        $this->columns[count($this->columns) - 1]['default'] = $expression;
         return $this;
     }
 
@@ -474,6 +503,7 @@ class Migration
         $this->migrationParts['if_exists']     = false;
         $this->migrationParts['create_table']  = null;
         $this->migrationParts['if_not_exists'] = false;
+        $this->migrationParts['primary_key']   = null;
     }
 
     /**
@@ -621,15 +651,20 @@ class Migration
             .$this->parts['create_table'];
 
         $columns = [];
+
         foreach ($this->columns as $value) {
             if (null === $value['data_type']) {
                 return '';
             }
 
-            $column = $value['name'].' '.$value['data_type'];
+            $column = $value['name'].(('' === $value['data_type']) ? '' : ' '.$value['data_type']);
 
-            if (null !== $value['constraint']) {
-                $column .= ' '.$value['constraint'];
+            if (null !== $value['not_null']) {
+                $column .= ' NOT NULL';
+            }
+
+            if (null !== $value['default']) {
+                $column .= ' DEFAULT '.$value['default'];
             }
 
             if (true === $value['autoincrement']) {
@@ -639,6 +674,10 @@ class Migration
             }
 
             $columns[] = $column;
+        }
+
+        if (null !== $this->parts['primary_key']) {
+            $columns[] = 'PRIMARY KEY ('.$this->parts['primary_key'].')';
         }
 
         $sql .= ' ('.implode(', ', $columns).')';
