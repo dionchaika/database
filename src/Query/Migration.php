@@ -118,9 +118,10 @@ class Migration
     {
         $this->columns[] = [
 
-            'name'       => $this->compileName($columnName),
-            'data_type'  => null,
-            'constraint' => null
+            'name'          => $this->compileName($columnName),
+            'data_type'     => null,
+            'constraint'    => null,
+            'autoincrement' => false
 
         ];
 
@@ -135,9 +136,10 @@ class Migration
     {
         $this->columns[] = [
 
-            'name'       => $expression,
-            'data_type'  => '',
-            'constraint' => ''
+            'name'          => $expression,
+            'data_type'     => '',
+            'constraint'    => '',
+            'autoincrement' => false
 
         ];
 
@@ -151,7 +153,7 @@ class Migration
      */
     public function int(?int $size = null, bool $unsigned = false): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('INT', $size, $unsigned);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileIntegerDataType('INT', $size, $unsigned);
         return $this;
     }
 
@@ -162,7 +164,7 @@ class Migration
      */
     public function bigInt(?int $size = null, bool $unsigned = false): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('UNSIGNED', $size, $unsigned);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileIntegerDataType('BIGINT', $size, $unsigned);
         return $this;
     }
 
@@ -173,7 +175,7 @@ class Migration
      */
     public function tinyInt(?int $size = null, bool $unsigned = false): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('TINYINT', $size, $unsigned);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileIntegerDataType('TINYINT', $size, $unsigned);
         return $this;
     }
 
@@ -184,7 +186,7 @@ class Migration
      */
     public function smallInt(?int $size = null, bool $unsigned = false): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('SMALLINT', $size, $unsigned);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileIntegerDataType('SMALLINT', $size, $unsigned);
         return $this;
     }
 
@@ -195,7 +197,7 @@ class Migration
      */
     public function mediumInt(?int $size = null, bool $unsigned = false): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('MEDIUMINT', $size, $unsigned);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileIntegerDataType('MEDIUMINT', $size, $unsigned);
         return $this;
     }
 
@@ -206,7 +208,7 @@ class Migration
      */
     public function float(?int $size = null, ?int $digits  = null): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileFloatDataType('FLOAT', $size, $digits);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileFloatDataType('FLOAT', $size, $digits);
         return $this;
     }
 
@@ -217,7 +219,7 @@ class Migration
      */
     public function double(?int $size = null, ?int $digits  = null): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileFloatDataType('DOUBLE', $size, $digits);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileFloatDataType('DOUBLE', $size, $digits);
         return $this;
     }
 
@@ -228,7 +230,7 @@ class Migration
      */
     public function decimal(?int $size = null, ?int $digits  = null): self
     {
-        $this->columns[count($this->columns) - 1] = $this->compileFloatDataType('DECIMAL', $size, $digits);
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileFloatDataType('DECIMAL', $size, $digits);
         return $this;
     }
 
@@ -237,7 +239,7 @@ class Migration
      */
     public function text(): self
     {
-        $this->columns[count($this->columns) - 1] = 'TEXT';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'TEXT';
         return $this;
     }
 
@@ -246,7 +248,7 @@ class Migration
      */
     public function longText(): self
     {
-        $this->columns[count($this->columns) - 1] = 'LONGTEXT';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'LONGTEXT';
         return $this;
     }
 
@@ -255,7 +257,7 @@ class Migration
      */
     public function tinyText(): self
     {
-        $this->columns[count($this->columns) - 1] = 'TINYTEXT';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'TINYTEXT';
         return $this;
     }
 
@@ -264,7 +266,7 @@ class Migration
      */
     public function mediumText(): self
     {
-        $this->columns[count($this->columns) - 1] = 'MEDIUMTEXT';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'MEDIUMTEXT';
         return $this;
     }
 
@@ -273,7 +275,7 @@ class Migration
      */
     public function blob(): self
     {
-        $this->columns[count($this->columns) - 1] = 'BLOB';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'BLOB';
         return $this;
     }
 
@@ -282,7 +284,7 @@ class Migration
      */
     public function longBlob(): self
     {
-        $this->columns[count($this->columns) - 1] = 'LONGBLOB';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'LONGBLOB';
         return $this;
     }
 
@@ -291,7 +293,7 @@ class Migration
      */
     public function mediumBlob(): self
     {
-        $this->columns[count($this->columns) - 1] = 'MEDIUMBLOB';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'MEDIUMBLOB';
         return $this;
     }
 
@@ -301,7 +303,7 @@ class Migration
      */
     public function char(int $size): self
     {
-        $this->columns[count($this->columns) - 1] = 'CHAR('.$size.')';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'CHAR('.$size.')';
         return $this;
     }
 
@@ -311,7 +313,7 @@ class Migration
      */
     public function varchar(int $size): self
     {
-        $this->columns[count($this->columns) - 1] = 'VARCHAR('.$size.')';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'VARCHAR('.$size.')';
         return $this;
     }
 
@@ -338,7 +340,7 @@ class Migration
             ? $values
             : func_get_args();
 
-            $this->columns[count($this->columns) - 1]
+            $this->columns[count($this->columns) - 1]['data_type']
                 = 'ENUM('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
 
         return $this;
@@ -349,7 +351,7 @@ class Migration
      */
     public function time(): self
     {
-        $this->columns[count($this->columns) - 1] = 'TIME()';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'TIME()';
         return $this;
     }
 
@@ -358,7 +360,7 @@ class Migration
      */
     public function year(): self
     {
-        $this->columns[count($this->columns) - 1] = 'YEAR()';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'YEAR()';
         return $this;
     }
 
@@ -367,7 +369,7 @@ class Migration
      */
     public function date(): self
     {
-        $this->columns[count($this->columns) - 1] = 'DATE()';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'DATE()';
         return $this;
     }
 
@@ -376,7 +378,7 @@ class Migration
      */
     public function datetime(): self
     {
-        $this->columns[count($this->columns) - 1] = 'DATETIME()';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'DATETIME()';
         return $this;
     }
 
@@ -385,7 +387,41 @@ class Migration
      */
     public function timestamp(): self
     {
-        $this->columns[count($this->columns) - 1] = 'TIMESTAMP()';
+        $this->columns[count($this->columns) - 1]['data_type'] = 'TIMESTAMP()';
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function notNull(): self
+    {
+        $this->columns[count($this->columns) - 1]['constraint'] = 'NOT NULL';
+        return $this;
+    }
+
+    /**
+     * @param mixed $value
+     * @return self
+     */
+    public function default($value): self
+    {
+        $this->columns[count($this->columns) - 1]['constraint'] = 'DEFAULT '.$this->compileValue($value);
+        return $this;
+    }
+
+    /**
+     * @param int|null $startWith
+     * @return self
+     */
+    public function autoincrement(int $startWith = null): self
+    {
+        $autoincrement = $startWith ?? true;
+
+        if ($this->type === self::TYPE_CREATE_TABLE) {
+            $this->columns[count($this->columns) - 1]['autoincrement'] = $autoincrement;
+        }
+
         return $this;
     }
 
