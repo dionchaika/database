@@ -151,7 +151,6 @@ class Migration
 
             'name'           => $this->compileName($columnName),
             'data_type'      => null,
-            'null'           => false,
             'not_null'       => false,
             'default'        => null,
             'auto_increment' => false
@@ -171,7 +170,6 @@ class Migration
 
             'name'           => $expression,
             'data_type'      => '',
-            'null'           => false,
             'not_null'       => false,
             'default'        => null,
             'auto_increment' => false
@@ -422,15 +420,6 @@ class Migration
     public function timestamp(): self
     {
         $this->columns[count($this->columns) - 1]['data_type'] = 'TIMESTAMP()';
-        return $this;
-    }
-
-    /**
-     * @return self
-     */
-    public function null(): self
-    {
-        $this->columns[count($this->columns) - 1]['null'] = true;
         return $this;
     }
 
@@ -751,9 +740,7 @@ class Migration
                 $column .= ' '.$value['data_type'];
             }
 
-            if ($value['null']) {
-                $column .= ' NULL';
-            } else if ($value['not_null']) {
+            if ($value['not_null']) {
                 $column .= ' NOT NULL';
             }
 
