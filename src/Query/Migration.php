@@ -426,7 +426,7 @@ class Migration
      */
     public function null(): self
     {
-        $this->columns[count($this->columns) - 1]['null']     = true;
+        $this->columns[count($this->columns) - 1]['null'] = true;
         $this->columns[count($this->columns) - 1]['not_null'] = false;
 
         return $this;
@@ -437,7 +437,7 @@ class Migration
      */
     public function notNull(): self
     {
-        $this->columns[count($this->columns) - 1]['null']     = false;
+        $this->columns[count($this->columns) - 1]['null'] = false;
         $this->columns[count($this->columns) - 1]['not_null'] = true;
 
         return $this;
