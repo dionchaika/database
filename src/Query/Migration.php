@@ -327,7 +327,10 @@ class Migration
             ? $values
             : func_get_args();
 
-        return $this->enum($values);
+            $this->columns[count($this->columns) - 1]['data_type']
+                = 'SET('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
+
+        return $this;
     }
 
     /**
