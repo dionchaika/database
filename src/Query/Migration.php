@@ -578,8 +578,8 @@ class Migration
     }
 
     /**
-     * @param string $name
-     * @param mixed  $values
+     * @param string  $name
+     * @param mixed[] $values
      * @return string
      */
     protected function compileEnumerationDataType(string $name, array $values): string
