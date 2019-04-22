@@ -563,9 +563,9 @@ class Migration
      * @param string   $name
      * @param int|null $size
      * @param int|null $digits
-     * @return self
+     * @return string
      */
-    public function compileFloatDataType(string $name, ?int $size = null, ?int $digits  = null): self
+    public function compileFloatDataType(string $name, ?int $size = null, ?int $digits  = null): string
     {
         $floatDataType = $name.'(';
         if (null !== $size) {
