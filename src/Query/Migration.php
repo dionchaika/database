@@ -427,8 +427,6 @@ class Migration
     public function null(): self
     {
         $this->columns[count($this->columns) - 1]['null'] = true;
-        $this->columns[count($this->columns) - 1]['not_null'] = false;
-
         return $this;
     }
 
@@ -437,9 +435,7 @@ class Migration
      */
     public function notNull(): self
     {
-        $this->columns[count($this->columns) - 1]['null'] = false;
         $this->columns[count($this->columns) - 1]['not_null'] = true;
-
         return $this;
     }
 
@@ -470,7 +466,6 @@ class Migration
     public function autoIncrement(int $startsWith = 1): self
     {
         if ($this->type === self::TYPE_CREATE_TABLE) {
-            $this->columns[count($this->columns) - 1]['default'] = null;
             $this->columns[count($this->columns) - 1]['auto_increment'] = true;
         }
 
@@ -517,7 +512,7 @@ class Migration
         $this->migrationParts['if_exists']     = false;
         $this->migrationParts['create_table']  = null;
         $this->migrationParts['if_not_exists'] = false;
-        $this->migrationParts['primary_key']   = null;
+        $this->migrationParts['primary_key']   = [];
     }
 
     /**
@@ -682,12 +677,10 @@ class Migration
                 $column .= ' NOT NULL';
             }
 
-            if (null !== $value['default']) {
-                $column .= ' DEFAULT '.$value['default'];
-            }
-
             if ($value['auto_increment']) {
                 $column .= ' AUTO_INCREMENT';
+            } else if (null !== $value['default']) {
+                $column .= ' DEFAULT '.$value['default'];
             }
 
             $columns[] = $column;
