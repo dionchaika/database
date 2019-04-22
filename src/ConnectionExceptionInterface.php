@@ -11,6 +11,4 @@
 
 namespace Dionchaika\Database;
 
-use Exception;
-
-class QueryException extends Exception implements FetchExceptionInterface {}
+interface ConnectionExceptionInterface {}
