@@ -95,8 +95,8 @@ class Migration extends Query
     }
 
     /**
-     * @param int|null  $size
-     * @param bool      $unsigned
+     * @param int|null $size
+     * @param bool     $unsigned
      * @return self
      */
     public function int(?int $size = null, bool $unsigned = false): self
@@ -118,8 +118,8 @@ class Migration extends Query
     }
 
     /**
-     * @param int|null  $size
-     * @param bool      $unsigned
+     * @param int|null $size
+     * @param bool     $unsigned
      * @return self
      */
     public function bigInt(?int $size = null, bool $unsigned = false): self
@@ -141,8 +141,8 @@ class Migration extends Query
     }
 
     /**
-     * @param int|null  $size
-     * @param bool      $unsigned
+     * @param int|null $size
+     * @param bool     $unsigned
      * @return self
      */
     public function tinyInt(?int $size = null, bool $unsigned = false): self
@@ -164,8 +164,8 @@ class Migration extends Query
     }
 
     /**
-     * @param int|null  $size
-     * @param bool      $unsigned
+     * @param int|null $size
+     * @param bool     $unsigned
      * @return self
      */
     public function smallInt(?int $size = null, bool $unsigned = false): self
@@ -187,8 +187,8 @@ class Migration extends Query
     }
 
     /**
-     * @param int|null  $size
-     * @param bool      $unsigned
+     * @param int|null $size
+     * @param bool     $unsigned
      * @return self
      */
     public function mediumInt(?int $size = null, bool $unsigned = false): self
