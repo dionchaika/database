@@ -28,11 +28,15 @@ class Migration
      */
     protected $parts = [
 
-        'drop_table'    => null,
-        'if_exists'     => false,
-        'create_table'  => null,
-        'if_not_exists' => false,
-        'primary_key'   => []
+        'drop_table'      => null,
+        'if_exists'       => false,
+        'create_table'    => null,
+        'if_not_exists'   => false,
+        'primary_key'     => [],
+        'drop_database'   => null,
+        'create_database' => null,
+        'character_set'   => null,
+        'collate'         => null
 
     ];
 
@@ -473,6 +477,78 @@ class Migration
     }
 
     /**
+     * @param mixed $databaseName
+     * @return self
+     */
+    public function dropDatabase($databaseName): self
+    {
+        $this->setType(self::TYPE_DROP_DATABASE);
+
+        $this->parts['drop_database']
+            = $this->compileName($databaseName);
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function dropDatabaseRaw(string $expression): self
+    {
+        $this->setType(self::TYPE_DROP_DATABASE);
+        $this->parts['drop_database'] = $expression;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed $databaseName
+     * @return self
+     */
+    public function createDatabase($databaseName): self
+    {
+        $this->setType(self::TYPE_CREATE_DATABASE);
+
+        $this->parts['create_database']
+            = $this->compileName($databaseName);
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function createDatabaseRaw(string $expression): self
+    {
+        $this->setType(self::TYPE_CREATE_DATABASE);
+        $this->parts['create_database'] = $expression;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed $characterSet
+     * @return self
+     */
+    public function characterSet($characterSet): self
+    {
+        $this->parts['character_set'] = $this->compileValue($characterSet);
+        return $this;
+    }
+
+    /**
+     * @param mixed $collate
+     * @return self
+     */
+    public function collate($collate): self
+    {
+        $this->parts['collate'] = $this->compileValue($collate);
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getSql(): string
@@ -508,11 +584,15 @@ class Migration
         $this->type = $type;
         $this->columns = [];
 
-        $this->migrationParts['drop_table']    = null;
-        $this->migrationParts['if_exists']     = false;
-        $this->migrationParts['create_table']  = null;
-        $this->migrationParts['if_not_exists'] = false;
-        $this->migrationParts['primary_key']   = [];
+        $this->migrationParts['drop_table']      = null;
+        $this->migrationParts['if_exists']       = false;
+        $this->migrationParts['create_table']    = null;
+        $this->migrationParts['if_not_exists']   = false;
+        $this->migrationParts['primary_key']     = [];
+        $this->migrationParts['drop_database']   = null;
+        $this->migrationParts['create_database'] = null;
+        $this->migrationParts['character_set']   = null;
+        $this->migrationParts['collate']         = null;
     }
 
     /**
@@ -693,6 +773,36 @@ class Migration
         }
 
         $sql .= ' ('.implode(', ', $columns).')';
+
+        return $sql.';';
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSqlForDropDatabase(): string
+    {
+        $sql = ($this->parts['if_exists'] ? 'DROP DATABASE IF EXISTS ' : 'DROP DATABASE ')
+            .$this->parts['drop_database'];
+
+        return $sql.';';
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSqlForCreateDatabase(): string
+    {
+        $sql = ($this->parts['if_not_exists'] ? 'CREATE DATABASE IF NOT EXISTS ' : 'CREATE DATABASE ')
+            .$this->parts['create_database'];
+
+        if (null !== $this->parts['character_set']) {
+            $sql .= ' CHARACTER SET = '.$this->parts['character_set'];
+        }
+
+        if (null !== $this->parts['collate']) {
+            $sql .= ' COLLATE = '.$this->parts['collate'];
+        }
 
         return $sql.';';
     }
