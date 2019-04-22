@@ -122,7 +122,7 @@ class Migration
             : func_get_args();
 
         $this->parts['primary_key'][]
-            = array_map(['static', 'compileName'], $columnNames);
+            = implode(', ', array_map(['static', 'compileName'], $columnNames));
 
         return $this;
     }
@@ -688,7 +688,7 @@ class Migration
 
         if (!empty($this->parts['primary_key'])) {
             foreach ($this->parts['primary_key'] as $primaryKey) {
-                $columns[] = 'PRIMARY KEY ('.implode(', ', $primaryKey).')';
+                $columns[] = 'PRIMARY KEY ('.$primaryKey.')';
             }
         }
 
