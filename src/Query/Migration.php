@@ -669,7 +669,10 @@ class Migration
                 return '';
             }
 
-            $column = $value['name'].(('' === $value['data_type']) ? '' : ' '.$value['data_type']);
+            $column = $value['name'];
+            if ('' !== $value['data_type']) {
+                $column .= ' '.$value['data_type'];
+            }
 
             if ($value['null']) {
                 $column .= ' NULL';
