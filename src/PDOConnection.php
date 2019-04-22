@@ -25,9 +25,14 @@ class PDOConnection implements ConnectionInterface
     protected $pdo;
 
     /**
-     * @var \PDOStatement|null
+     * @var \PDOStatement
      */
     protected $stmt;
+
+    /**
+     * @var bool
+     */
+    protected $prepared = false;
 
     /**
      * @param \PDO $pdo
@@ -50,14 +55,6 @@ class PDOConnection implements ConnectionInterface
     }
 
     /**
-     * @return \PDOStatement|null
-     */
-    public function getPDOStatement(): ?PDOStatement
-    {
-        return $this->stmt;
-    }
-
-    /**
      * @param string $sql
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
@@ -66,8 +63,9 @@ class PDOConnection implements ConnectionInterface
     {
         try {
             $this->stmt = $this->pdo->query($sql);
+            $this->prepared = false;
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $e->getCode(), $e->getPrevious());
+            throw new QueryException($e->getMessage());
         }
     }
 
@@ -80,8 +78,9 @@ class PDOConnection implements ConnectionInterface
     {
         try {
             $this->stmt = $this->pdo->prepare($sql);
+            $this->prepared = true;
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $e->getCode(), $e->getPrevious());
+            throw new QueryException($e->getMessage());
         }
     }
 
@@ -92,7 +91,7 @@ class PDOConnection implements ConnectionInterface
      */
     public function execute(array $params = []): void
     {
-        if (null === $this->stmt) {
+        if (!$this->prepared) {
             throw new QueryException(
                 'Query is not being prepared before execution!'
             );
@@ -118,24 +117,24 @@ class PDOConnection implements ConnectionInterface
 
             $this->stmt->execute();
         } catch (PDOException $e) {
-            throw new QueryException($e->getMessage(), $e->getCode(), $e->getPrevious());
+            throw new QueryException($e->getMessage());
         }
     }
 
     /**
-     * @return mixed[]|null
+     * @return mixed[]
      * @throws \Dionchaika\Database\FetchExceptionInterface
      */
-    public function fetchAll(): ?array
+    public function fetchAll(): array
     {
-        if (null === $this->stmt) {
-            return null;
+        if (!($this->stmt instanceof PDOStatement)) {
+            return [];
         }
 
         try {
             return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            throw new FetchException($e->getMessage(), $e->getCode(), $e->getPrevious());
+            throw new FetchException($e->getMessage());
         }
     }
 

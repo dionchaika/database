@@ -12,7 +12,6 @@
 namespace Dionchaika\Database;
 
 use mysqli;
-use mysqli_stmt;
 use mysqli_result;
 use Dionchaika\Database\QueryException;
 
@@ -24,14 +23,19 @@ class MySQLiConnection implements ConnectionInterface
     protected $mysqli;
 
     /**
-     * @var \mysqli_stmt|null
+     * @var \mysqli_stmt
      */
     protected $stmt;
 
     /**
-     * @var \mysqli_result|null
+     * @var \mysqli_result
      */
     protected $result;
+
+    /**
+     * @var bool
+     */
+    protected $prepared = false;
 
     /**
      * @param \mysqli $mysqli
@@ -50,22 +54,6 @@ class MySQLiConnection implements ConnectionInterface
     }
 
     /**
-     * @return \mysqli_stmt|null
-     */
-    public function getStmt(): ?mysqli_stmt
-    {
-        return $this->stmt;
-    }
-
-    /**
-     * @return \mysqli_result|null
-     */
-    public function getResult(): ?mysqli_result
-    {
-        return $this->result;
-    }
-
-    /**
      * @param string $sql
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
@@ -76,6 +64,8 @@ class MySQLiConnection implements ConnectionInterface
         if (false === $this->result) {
             throw new QueryException($this->mysqli->error);
         }
+
+        $this->prepared = false;
     }
 
     /**
@@ -86,9 +76,11 @@ class MySQLiConnection implements ConnectionInterface
     public function prepare(string $sql): void
     {
         $this->stmt = $this->mysqli->prepare($sql);
-        if (false === $this->result) {
+        if (false === $this->stmt) {
             throw new QueryException($this->mysqli->error);
         }
+
+        $this->prepared = true;
     }
 
     /**
@@ -98,7 +90,7 @@ class MySQLiConnection implements ConnectionInterface
      */
     public function execute(array $params = []): void
     {
-        if (null === $this->stmt) {
+        if (!$this->prepared) {
             throw new QueryException(
                 'Query is not being prepared before execution!'
             );
@@ -132,12 +124,12 @@ class MySQLiConnection implements ConnectionInterface
     }
 
     /**
-     * @return mixed[]|null
+     * @return mixed[]
      */
-    public function fetchAll(): ?array
+    public function fetchAll(): array
     {
-        if (null === $this->result || is_bool($this->result)) {
-            return null;
+        if (!($this->result instanceof mysqli_result)) {
+            return [];
         }
 
         return $this->result->fetch_all(\MYSQLI_ASSOC);
