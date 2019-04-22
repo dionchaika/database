@@ -34,7 +34,7 @@ interface ConnectionInterface
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
      */
-    public function execute(?array $params = []): void;
+    public function execute(array $params = []): void;
 
     /**
      * @return mixed[]|null
