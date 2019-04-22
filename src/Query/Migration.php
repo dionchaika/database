@@ -147,7 +147,7 @@ class Migration
 
             'name'          => $this->compileName($columnName),
             'data_type'     => null,
-            'not_null'      => null,
+            'not_null'      => false,
             'default'       => null,
             'autoincrement' => false
 
@@ -166,7 +166,7 @@ class Migration
 
             'name'          => $expression,
             'data_type'     => '',
-            'not_null'      => null,
+            'not_null'      => false,
             'default'       => null,
             'autoincrement' => false
 
@@ -659,7 +659,7 @@ class Migration
 
             $column = $value['name'].(('' === $value['data_type']) ? '' : ' '.$value['data_type']);
 
-            if (null !== $value['not_null']) {
+            if ($value['not_null']) {
                 $column .= ' NOT NULL';
             }
 
