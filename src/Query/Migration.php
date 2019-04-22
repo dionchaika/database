@@ -410,6 +410,16 @@ class Migration
     }
 
     /**
+     * @param string $expression
+     * @return self
+     */
+    public function defaultRaw(string $expression): self
+    {
+        $this->columns[count($this->columns) - 1]['constraint'] = 'DEFAULT '.$expression;
+        return $this;
+    }
+
+    /**
      * @param int|null $startWith
      * @return self
      */
