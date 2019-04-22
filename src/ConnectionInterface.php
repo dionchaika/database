@@ -17,6 +17,7 @@ interface ConnectionInterface
      * @param string $sql
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
+     * @throws \Dionchaika\Database\ConnectionExceptionInterface
      */
     public function query(string $sql): void;
 
@@ -24,6 +25,7 @@ interface ConnectionInterface
      * @param string $sql
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
+     * @throws \Dionchaika\Database\ConnectionExceptionInterface
      */
     public function prepare(string $sql): void;
 
@@ -32,7 +34,7 @@ interface ConnectionInterface
      * @return void
      * @throws \Dionchaika\Database\QueryExceptionInterface
      */
-    public function execute(array $params = []): void;
+    public function execute(?array $params = []): void;
 
     /**
      * @return mixed[]|null
