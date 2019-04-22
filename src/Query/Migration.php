@@ -11,7 +11,7 @@
 
 namespace Dionchaika\Database\Query;
 
-class Migration extends Query
+class Migration
 {
     const TYPE_DROP_TABLE = 0;
     const TYPE_CREATE_TABLE = 1;
@@ -19,17 +19,26 @@ class Migration extends Query
     const TYPE_CREATE_DATABASE = 3;
 
     /**
+     * @var int
+     */
+    protected $type = self::TYPE_DROP_TABLE;
+
+    /**
      * @var mixed[]
      */
-    protected $migrationParts = [
+    protected $parts = [
 
         'drop_table'    => null,
         'if_exists'     => false,
         'create_table'  => null,
-        'if_not_exists' => false,
-        'columns'       => []
+        'if_not_exists' => false
 
     ];
+
+    /**
+     * @var mixed[]
+     */
+    protected $columns = [];
 
     /**
      * @param mixed $tableName
@@ -39,8 +48,20 @@ class Migration extends Query
     {
         $this->setType(self::TYPE_DROP_TABLE);
 
-        $this->migrationParts['drop_table']
+        $this->parts['drop_table']
             = $this->compileName($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function dropTableRaw(string $expression): self
+    {
+        $this->setType(self::TYPE_DROP_TABLE);
+        $this->parts['drop_table'] = $expression;
 
         return $this;
     }
@@ -50,7 +71,7 @@ class Migration extends Query
      */
     public function ifExists(): self
     {
-        $this->migrationParts['if_exists'] = true;
+        $this->parts['if_exists'] = true;
         return $this;
     }
 
@@ -62,8 +83,20 @@ class Migration extends Query
     {
         $this->setType(self::TYPE_CREATE_TABLE);
 
-        $this->migrationParts['create_table']
+        $this->parts['create_table']
             = $this->compileName($tableName);
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function createTableRaw(string $expression): self
+    {
+        $this->setType(self::TYPE_CREATE_TABLE);
+        $this->parts['create_table'] = $expression;
 
         return $this;
     }
@@ -73,21 +106,38 @@ class Migration extends Query
      */
     public function ifNotExists(): self
     {
-        $this->migrationParts['if_not_exists'] = true;
+        $this->parts['if_not_exists'] = true;
         return $this;
     }
 
     /**
-     * @param mixed  $columnName
-     * @param string $dataType
+     * @param mixed $columnName
      * @return self
      */
-    public function column($columnName, string $dataType = 'INT()'): self
+    public function column($columnName): self
     {
-        $this->migrationParts['columns'][] = [
+        $this->columns[] = [
 
-            'name'      => $this->compileName($columnName),
-            'data_type' => $dataType
+            'name'       => $this->compileName($columnName),
+            'data_type'  => null,
+            'constraint' => null
+
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function columnRaw(string $expression): self
+    {
+        $this->columns[] = [
+
+            'name'       => $expression,
+            'data_type'  => '',
+            'constraint' => ''
 
         ];
 
@@ -101,19 +151,7 @@ class Migration extends Query
      */
     public function int(?int $size = null, bool $unsigned = false): self
     {
-        $dataType = 'INT(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if ($unsigned) {
-                $dataType .= ' UNSIGNED';
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('INT', $size, $unsigned);
         return $this;
     }
 
@@ -124,19 +162,7 @@ class Migration extends Query
      */
     public function bigInt(?int $size = null, bool $unsigned = false): self
     {
-        $dataType = 'BIGINT(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if ($unsigned) {
-                $dataType .= ' UNSIGNED';
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('UNSIGNED', $size, $unsigned);
         return $this;
     }
 
@@ -147,19 +173,7 @@ class Migration extends Query
      */
     public function tinyInt(?int $size = null, bool $unsigned = false): self
     {
-        $dataType = 'TINYINT(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if ($unsigned) {
-                $dataType .= ' UNSIGNED';
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('TINYINT', $size, $unsigned);
         return $this;
     }
 
@@ -170,19 +184,7 @@ class Migration extends Query
      */
     public function smallInt(?int $size = null, bool $unsigned = false): self
     {
-        $dataType = 'SMALLINT(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if ($unsigned) {
-                $dataType .= ' UNSIGNED';
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('SMALLINT', $size, $unsigned);
         return $this;
     }
 
@@ -193,19 +195,7 @@ class Migration extends Query
      */
     public function mediumInt(?int $size = null, bool $unsigned = false): self
     {
-        $dataType = 'MEDIUMINT(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if ($unsigned) {
-                $dataType .= ' UNSIGNED';
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileIntegerDataType('MEDIUMINT', $size, $unsigned);
         return $this;
     }
 
@@ -216,19 +206,7 @@ class Migration extends Query
      */
     public function float(?int $size = null, ?int $digits  = null): self
     {
-        $dataType = 'FLOAT(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if (null !== $digits) {
-                $dataType .= ', '.$digits;
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileFloatDataType('FLOAT', $size, $digits);
         return $this;
     }
 
@@ -239,19 +217,7 @@ class Migration extends Query
      */
     public function double(?int $size = null, ?int $digits  = null): self
     {
-        $dataType = 'DOUBLE(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if (null !== $digits) {
-                $dataType .= ', '.$digits;
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileFloatDataType('DOUBLE', $size, $digits);
         return $this;
     }
 
@@ -262,19 +228,7 @@ class Migration extends Query
      */
     public function decimal(?int $size = null, ?int $digits  = null): self
     {
-        $dataType = 'DECIMAL(';
-        if (null !== $size) {
-            $dataType .= $size;
-            if (null !== $digits) {
-                $dataType .= ', '.$digits;
-            }
-        }
-
-        $dataType .= ')';
-
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = $dataType;
-
+        $this->columns[count($this->columns) - 1] = $this->compileFloatDataType('DECIMAL', $size, $digits);
         return $this;
     }
 
@@ -283,9 +237,7 @@ class Migration extends Query
      */
     public function text(): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'TEXT';
-
+        $this->columns[count($this->columns) - 1] = 'TEXT';
         return $this;
     }
 
@@ -294,9 +246,7 @@ class Migration extends Query
      */
     public function tinyText(): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'TINYTEXT';
-
+        $this->columns[count($this->columns) - 1] = 'TINYTEXT';
         return $this;
     }
 
@@ -306,9 +256,7 @@ class Migration extends Query
      */
     public function char(int $size): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'CHAR('.$size.')';
-
+        $this->columns[count($this->columns) - 1] = 'CHAR('.$size.')';
         return $this;
     }
 
@@ -318,9 +266,7 @@ class Migration extends Query
      */
     public function varchar(int $size): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'VARCHAR('.$size.')';
-
+        $this->columns[count($this->columns) - 1] = 'VARCHAR('.$size.')';
         return $this;
     }
 
@@ -347,8 +293,8 @@ class Migration extends Query
             ? $values
             : func_get_args();
 
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'ENUM('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
+            $this->columns[count($this->columns) - 1]
+                = 'ENUM('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
 
         return $this;
     }
@@ -358,9 +304,7 @@ class Migration extends Query
      */
     public function time(): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'TIME()';
-
+        $this->columns[count($this->columns) - 1] = 'TIME()';
         return $this;
     }
 
@@ -369,9 +313,7 @@ class Migration extends Query
      */
     public function year(): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'YEAR()';
-
+        $this->columns[count($this->columns) - 1] = 'YEAR()';
         return $this;
     }
 
@@ -380,9 +322,7 @@ class Migration extends Query
      */
     public function date(): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'DATE()';
-
+        $this->columns[count($this->columns) - 1] = 'DATE()';
         return $this;
     }
 
@@ -391,9 +331,7 @@ class Migration extends Query
      */
     public function datetime(): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'DATETIME()';
-
+        $this->columns[count($this->columns) - 1] = 'DATETIME()';
         return $this;
     }
 
@@ -402,9 +340,7 @@ class Migration extends Query
      */
     public function timestamp(): self
     {
-        $this->migrationParts['columns'][count($this->migrationParts['columns']) - 1]['data_type']
-            = 'TIMESTAMP()';
-
+        $this->columns[count($this->columns) - 1] = 'TIMESTAMP()';
         return $this;
     }
 
@@ -423,8 +359,16 @@ class Migration extends Query
             case self::TYPE_CREATE_DATABASE:
                 return $this->getSqlForCreateDatabase();
             default:
-                return parent::getSql();
+                return '';
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getSql();
     }
 
     /**
@@ -433,13 +377,124 @@ class Migration extends Query
      */
     protected function setType(int $type): void
     {
-        parent::setType($type);
+        $this->type = $type;
+        $this->columns = [];
 
         $this->migrationParts['drop_table']    = null;
         $this->migrationParts['if_exists']     = false;
         $this->migrationParts['create_table']  = null;
         $this->migrationParts['if_not_exists'] = false;
-        $this->migrationParts['columns']       = [];
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    protected function quoteName(string $name): string
+    {
+        return ('*' === $name)
+            ? $name
+            : '`'.str_replace('`', '\\`', $name).'`';
+    }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    protected function quoteString(string $string): string
+    {
+        return '\''.str_replace('\'', '\\\'', $string).'\'';
+    }
+
+    /**
+     * @param mixed $name
+     * @return string
+     */
+    protected function compileName($name): string
+    {
+        $name = (string)$name;
+
+        if (preg_match('/\s+as\s+/i', $name)) {
+            [$name, $alias] = array_filter(preg_split('/\s+as\s+/i', $name, 2));
+        } else {
+            $alias = null;
+        }
+
+        $name = implode('.', array_map(['static', 'quoteName'], preg_split('/\s*\.\s*/', $name, 3)));
+        if (!empty($alias)) {
+            $name .= ' AS '.$this->quoteName($alias);
+        }
+
+        return $name;
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    protected function compileValue($value): string
+    {
+        if (null === $value) {
+            return 'NULL';
+        }
+
+        if (true === $value) {
+            return 'TRUE';
+        }
+
+        if (false === $value) {
+            return 'FALSE';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (string)$value;
+        }
+
+        $value = (string)$value;
+
+        if ('?' === $value || 0 === strpos($value, ':')) {
+            return $value;
+        }
+
+        return $this->quoteString($value);
+    }
+
+    /**
+     * @param string   $name
+     * @param int|null $size
+     * @param bool     $unsigned
+     * @return string
+     */
+    protected function compileIntegerDataType(string $name, ?int $size = null, bool $unsigned = false): string
+    {
+        $integerDataType = $name.'(';
+        if (null !== $size) {
+            $integerDataType .= $size;
+            if ($unsigned) {
+                $integerDataType .= ' UNSIGNED';
+            }
+        }
+
+        return $integerDataType.')';
+    }
+
+    /**
+     * @param string   $name
+     * @param int|null $size
+     * @param int|null $digits
+     * @return self
+     */
+    public function compileFloatDataType(string $name, ?int $size = null, ?int $digits  = null): self
+    {
+        $floatDataType = $name.'(';
+        if (null !== $size) {
+            $floatDataType .= $size;
+            if (null !== $digits) {
+                $floatDataType .= ', '.$digits;
+            }
+        }
+
+        return $floatDataType.')';
     }
 
     /**
@@ -447,8 +502,8 @@ class Migration extends Query
      */
     protected function getSqlForDropTable(): string
     {
-        $sql = ($this->migrationParts['if_exists'] ? 'DROP TABLE IF EXISTS ' : 'DROP TABLE ')
-            .$this->migrationParts['drop_table'];
+        $sql = ($this->parts['if_exists'] ? 'DROP TABLE IF EXISTS ' : 'DROP TABLE ')
+            .$this->parts['drop_table'];
 
         return $sql.';';
     }
