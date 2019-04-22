@@ -104,22 +104,28 @@ class MySQLiConnection implements ConnectionInterface
             );
         }
 
-        $types = '';
-        foreach ($params as $param) {
-            if (is_int($param)) {
-                $types .= 'i';
-            } else if (is_float($param)) {
-                $types .= 'd';
-            } else {
-                $types .= 's';
+        if (!empty($params)) {
+            $types = '';
+            foreach ($params as $param) {
+                if (is_int($param)) {
+                    $types .= 'i';
+                } else if (is_float($param)) {
+                    $types .= 'd';
+                } else {
+                    $types .= 's';
+                }
+            }
+
+            if (false === $this->stmt->bind_param($types, ...$params)) {
+                throw new QueryException($this->mysqli->error);
             }
         }
 
-        if (false === $this->stmt->bind_param($types, ...array_values($params))) {
+        if (false === $this->stmt->execute()) {
             throw new QueryException($this->mysqli->error);
         }
 
-        $this->result = $this->stmt->execute();
+        $this->result = $this->stmt->get_result();
         if (false === $this->result) {
             throw new QueryException($this->mysqli->error);
         }
