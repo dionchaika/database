@@ -32,7 +32,7 @@ class Migration
         'if_exists'     => false,
         'create_table'  => null,
         'if_not_exists' => false,
-        'primary_key'   => null
+        'primary_key'   => []
 
     ];
 
@@ -122,7 +122,7 @@ class Migration
             : func_get_args();
 
         $this->parts['primary_key']
-            = implode(', ', array_map(['static', 'compileName'], $columnNames));
+            = array_map(['static', 'compileName'], $columnNames);
 
         return $this;
     }
@@ -145,11 +145,12 @@ class Migration
     {
         $this->columns[] = [
 
-            'name'          => $this->compileName($columnName),
-            'data_type'     => null,
-            'not_null'      => false,
-            'default'       => null,
-            'autoincrement' => false
+            'name'           => $this->compileName($columnName),
+            'data_type'      => null,
+            'null'           => false,
+            'not_null'       => false,
+            'default'        => null,
+            'auto_increment' => false
 
         ];
 
@@ -164,11 +165,12 @@ class Migration
     {
         $this->columns[] = [
 
-            'name'          => $expression,
-            'data_type'     => '',
-            'not_null'      => false,
-            'default'       => null,
-            'autoincrement' => false
+            'name'           => $expression,
+            'data_type'      => '',
+            'null'           => false,
+            'not_null'       => false,
+            'default'        => null,
+            'auto_increment' => false
 
         ];
 
@@ -422,9 +424,22 @@ class Migration
     /**
      * @return self
      */
+    public function null(): self
+    {
+        $this->columns[count($this->columns) - 1]['null']     = true;
+        $this->columns[count($this->columns) - 1]['not_null'] = false;
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
     public function notNull(): self
     {
+        $this->columns[count($this->columns) - 1]['null']     = false;
         $this->columns[count($this->columns) - 1]['not_null'] = true;
+
         return $this;
     }
 
@@ -449,15 +464,12 @@ class Migration
     }
 
     /**
-     * @param int|null $startsWith
      * @return self
      */
-    public function autoincrement(int $startsWith = null): self
+    public function autoIncrement(): self
     {
-        $autoincrement = $startsWith ?? true;
-
         if ($this->type === self::TYPE_CREATE_TABLE) {
-            $this->columns[count($this->columns) - 1]['autoincrement'] = $autoincrement;
+            $this->columns[count($this->columns) - 1]['auto_increment'] = true;
         }
 
         return $this;
@@ -659,7 +671,9 @@ class Migration
 
             $column = $value['name'].(('' === $value['data_type']) ? '' : ' '.$value['data_type']);
 
-            if ($value['not_null']) {
+            if ($value['null']) {
+                $column .= ' NULL';
+            } else if ($value['not_null']) {
                 $column .= ' NOT NULL';
             }
 
@@ -667,17 +681,15 @@ class Migration
                 $column .= ' DEFAULT '.$value['default'];
             }
 
-            if (true === $value['autoincrement']) {
+            if ($value['auto_increment']) {
                 $column .= ' AUTO_INCREMENT';
-            } else if (is_int($value['autoincrement'])) {
-                $column .= ' AUTO_INCREMENT = '.$value['autoincrement'];
             }
 
             $columns[] = $column;
         }
 
         if (null !== $this->parts['primary_key']) {
-            $columns[] = 'PRIMARY KEY ('.$this->parts['primary_key'].')';
+            $columns[] = 'PRIMARY KEY ('.implode(', ', $this->parts['primary_key']).')';
         }
 
         $sql .= ' ('.implode(', ', $columns).')';
