@@ -327,9 +327,7 @@ class Migration
             ? $values
             : func_get_args();
 
-            $this->columns[count($this->columns) - 1]['data_type']
-                = 'SET('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
-
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileEnumerationDataType('SET', $values);
         return $this;
     }
 
@@ -343,9 +341,7 @@ class Migration
             ? $values
             : func_get_args();
 
-            $this->columns[count($this->columns) - 1]['data_type']
-                = 'ENUM('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
-
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileEnumerationDataType('ENUM', $values);
         return $this;
     }
 
@@ -568,7 +564,7 @@ class Migration
      * @param int|null $digits
      * @return string
      */
-    public function compileFloatDataType(string $name, ?int $size = null, ?int $digits  = null): string
+    protected function compileFloatDataType(string $name, ?int $size = null, ?int $digits  = null): string
     {
         $floatDataType = $name.'(';
         if (null !== $size) {
@@ -579,6 +575,16 @@ class Migration
         }
 
         return $floatDataType.')';
+    }
+
+    /**
+     * @param string $name
+     * @param mixed  $values
+     * @return string
+     */
+    protected function compileEnumerationDataType(string $name, array $values): string
+    {
+        return $name.'('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
     }
 
     /**
