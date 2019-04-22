@@ -588,4 +588,43 @@ class Migration
 
         return $sql.';';
     }
+
+    /**
+     * @return string
+     */
+    protected function getSqlForCreateTable(): string
+    {
+        if (empty($this->columns)) {
+            return '';
+        }
+
+        $sql = ($this->parts['if_not_exists'] ? 'CREATE TABLE IF NOT EXISTS ' : 'CREATE TABLE ')
+            .$this->parts['create_table'];
+
+        $columns = [];
+        foreach ($this->columns as $value) {
+            if (null === $value['data_type']) {
+                return '';
+            }
+
+            $column = $value['name'].' '.$value['data_type'];
+
+            if (null !== $value['constraint']) {
+                $column .= ' '.$value['constraint'];
+            }
+
+            if (null !== $value['autoincrement']) {
+                $column .= ' AUTO_INCREMENT';
+                if (is_int($value['autoincrement'])) {
+                    $column .= ' = '.$value['autoincrement'];
+                }
+            }
+
+            $columns[] = $column;
+        }
+
+        $sql .= ' ('.implode(', ', $columns).')';
+
+        return $sql.';';
+    }
 }
