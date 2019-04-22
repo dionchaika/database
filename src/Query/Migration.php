@@ -121,7 +121,7 @@ class Migration
             ? $columnNames
             : func_get_args();
 
-        $this->parts['primary_key']
+        $this->parts['primary_key'][]
             = array_map(['static', 'compileName'], $columnNames);
 
         return $this;
@@ -133,7 +133,7 @@ class Migration
      */
     public function primaryKeyRaw(string $expression): self
     {
-        $this->parts['primary_key'] = $expression;
+        $this->parts['primary_key'][] = $expression;
         return $this;
     }
 
@@ -464,11 +464,13 @@ class Migration
     }
 
     /**
+     * @param int $startsWith
      * @return self
      */
-    public function autoIncrement(): self
+    public function autoIncrement(int $startsWith = 1): self
     {
         if ($this->type === self::TYPE_CREATE_TABLE) {
+            $this->columns[count($this->columns) - 1]['default'] = null;
             $this->columns[count($this->columns) - 1]['auto_increment'] = true;
         }
 
@@ -691,8 +693,10 @@ class Migration
             $columns[] = $column;
         }
 
-        if (null !== $this->parts['primary_key']) {
-            $columns[] = 'PRIMARY KEY ('.implode(', ', $this->parts['primary_key']).')';
+        if (!empty($this->parts['primary_key'])) {
+            foreach ($this->parts['primary_key'] as $primaryKey) {
+                $columns[] = 'PRIMARY KEY ('.implode(', ', $primaryKey).')';
+            }
         }
 
         $sql .= ' ('.implode(', ', $columns).')';
