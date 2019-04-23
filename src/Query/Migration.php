@@ -31,8 +31,11 @@ class Migration
         'drop_table'      => null,
         'if_exists'       => false,
         'create_table'    => null,
+        'comment'         => null,
         'if_not_exists'   => false,
         'primary_key'     => [],
+        'unique'          => [],
+        'check'           => [],
         'engine'          => null,
         'drop_database'   => null,
         'create_database' => null,
@@ -82,27 +85,39 @@ class Migration
     }
 
     /**
-     * @param mixed $tableName
+     * @param mixed      $tableName
+     * @param mixed|null $comment
      * @return self
      */
-    public function createTable($tableName): self
+    public function createTable($tableName, $comment = null): self
     {
         $this->setType(self::TYPE_CREATE_TABLE);
 
         $this->parts['create_table']
             = $this->compileName($tableName);
 
+        if (null !== $comment) {
+            $this->parts['comment']
+                = $this->compileValue($comment);
+        }
+
         return $this;
     }
 
     /**
-     * @param string $expression
+     * @param string     $expression
+     * @param mixed|null $comment
      * @return self
      */
-    public function createTableRaw(string $expression): self
+    public function createTableRaw(string $expression, $comment = null): self
     {
         $this->setType(self::TYPE_CREATE_TABLE);
         $this->parts['create_table'] = $expression;
+
+        if (null !== $comment) {
+            $this->parts['comment']
+                = $this->compileValue($comment);
+        }
 
         return $this;
     }
@@ -143,6 +158,42 @@ class Migration
     }
 
     /**
+     * @param mixed $columnNames
+     * @return self
+     */
+    public function unique($columnNames): self
+    {
+        $columnNames = is_array($columnNames)
+            ? $columnNames
+            : func_get_args();
+
+        $this->parts['unique'][]
+            = implode(', ', array_map(['static', 'compileName'], $columnNames));
+
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function uniqueRaw(string $expression): self
+    {
+        $this->parts['unique'][] = $expression;
+        return $this;
+    }
+
+    /**
+     * @param string $expression
+     * @return self
+     */
+    public function check(string $expression): self
+    {
+        $this->parts['check'][] = $expression;
+        return $this;
+    }
+
+    /**
      * @param mixed $engine
      * @return self
      */
@@ -164,7 +215,8 @@ class Migration
             'data_type'      => null,
             'not_null'       => false,
             'default'        => null,
-            'auto_increment' => false
+            'auto_increment' => false,
+            'comment'        => null
 
         ];
 
@@ -183,7 +235,8 @@ class Migration
             'data_type'      => '',
             'not_null'       => false,
             'default'        => null,
-            'auto_increment' => false
+            'auto_increment' => false,
+            'comment'        => null
 
         ];
 
@@ -482,6 +535,16 @@ class Migration
     }
 
     /**
+     * @param mixed $comment
+     * @return self
+     */
+    public function comment($comment): self
+    {
+        $this->columns[count($this->columns) - 1]['comment'] = $this->compileValue($comment);
+        return $this;
+    }
+
+    /**
      * @param mixed $databaseName
      * @return self
      */
@@ -589,16 +652,19 @@ class Migration
         $this->type = $type;
         $this->columns = [];
 
-        $this->migrationParts['drop_table']      = null;
-        $this->migrationParts['if_exists']       = false;
-        $this->migrationParts['create_table']    = null;
-        $this->migrationParts['if_not_exists']   = false;
-        $this->migrationParts['primary_key']     = [];
-        $this->migrationParts['engine']          = null;
-        $this->migrationParts['drop_database']   = null;
-        $this->migrationParts['create_database'] = null;
-        $this->migrationParts['character_set']   = null;
-        $this->migrationParts['collate']         = null;
+        $this->parts['drop_table']      = null;
+        $this->parts['if_exists']       = false;
+        $this->parts['create_table']    = null;
+        $this->parts['comment']         = null;
+        $this->parts['if_not_exists']   = false;
+        $this->parts['primary_key']     = [];
+        $this->parts['unique']          = [];
+        $this->parts['check']           = [];
+        $this->parts['engine']          = null;
+        $this->parts['drop_database']   = null;
+        $this->parts['create_database'] = null;
+        $this->parts['character_set']   = null;
+        $this->parts['collate']         = null;
     }
 
     /**
@@ -684,12 +750,11 @@ class Migration
     {
         $integerDataType = $name;
         if (null !== $size) {
-            $integerDataType .= '('.$size;
-            if ($unsigned) {
-                $integerDataType .= ' UNSIGNED';
-            }
+            $integerDataType .= '('.$size.')';
+        }
 
-            $integerDataType .= ')';
+        if ($unsigned) {
+            $integerDataType .= ' UNSIGNED';
         }
 
         return $integerDataType;
@@ -786,6 +851,10 @@ class Migration
                 $column .= ' DEFAULT '.$value['default'];
             }
 
+            if (null !== $value['comment']) {
+                $column .= ' COMMENT '.$value['comment'];
+            }
+
             $columns[] = $column;
         }
 
@@ -795,10 +864,26 @@ class Migration
             }
         }
 
+        if (!empty($this->parts['unique'])) {
+            foreach ($this->parts['unique'] as $unique) {
+                $columns[] = 'UNIQUE ('.$unique.')';
+            }
+        }
+
+        if (!empty($this->parts['check'])) {
+            foreach ($this->parts['check'] as $check) {
+                $columns[] = 'CHECK ('.$check.')';
+            }
+        }
+
         $sql .= ' ('.implode(', ', $columns).')';
 
         if (null !== $this->parts['engine']) {
             $sql .= ' ENGINE = '.$this->parts['engine'];
+        }
+
+        if (null !== $this->parts['comment']) {
+            $sql .= ' COMMENT = '.$this->parts['comment'];
         }
 
         return $sql.';';
