@@ -33,6 +33,7 @@ class Migration
         'create_table'    => null,
         'if_not_exists'   => false,
         'primary_key'     => [],
+        'engine'          => null,
         'drop_database'   => null,
         'create_database' => null,
         'character_set'   => null,
@@ -138,6 +139,16 @@ class Migration
     public function primaryKeyRaw(string $expression): self
     {
         $this->parts['primary_key'][] = $expression;
+        return $this;
+    }
+
+    /**
+     * @param mixed $engine
+     * @return self
+     */
+    public function engine($engine): self
+    {
+        $this->parts['engine'] = $this->compileValue($engine);
         return $this;
     }
 
@@ -379,47 +390,52 @@ class Migration
     }
 
     /**
+     * @param int|null $size
      * @return self
      */
-    public function time(): self
+    public function time(?int $size = null): self
     {
-        $this->columns[count($this->columns) - 1]['data_type'] = 'TIME()';
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileTimeDataType('TIME', $size);
         return $this;
     }
 
     /**
+     * @param int|null $size
      * @return self
      */
-    public function year(): self
+    public function year(?int $size = null): self
     {
-        $this->columns[count($this->columns) - 1]['data_type'] = 'YEAR()';
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileTimeDataType('YEAR', $size);
         return $this;
     }
 
     /**
+     * @param int|null $size
      * @return self
      */
-    public function date(): self
+    public function date(?int $size = null): self
     {
-        $this->columns[count($this->columns) - 1]['data_type'] = 'DATE()';
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileTimeDataType('DATE', $size);
         return $this;
     }
 
     /**
+     * @param int|null $size
      * @return self
      */
-    public function datetime(): self
+    public function datetime(?int $size = null): self
     {
-        $this->columns[count($this->columns) - 1]['data_type'] = 'DATETIME()';
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileTimeDataType('DATETIME', $size);
         return $this;
     }
 
     /**
+     * @param int|null $size
      * @return self
      */
-    public function timestamp(): self
+    public function timestamp(?int $size = null): self
     {
-        $this->columns[count($this->columns) - 1]['data_type'] = 'TIMESTAMP()';
+        $this->columns[count($this->columns) - 1]['data_type'] = $this->compileTimeDataType('TIMESTAMP', $size);
         return $this;
     }
 
@@ -578,6 +594,7 @@ class Migration
         $this->migrationParts['create_table']    = null;
         $this->migrationParts['if_not_exists']   = false;
         $this->migrationParts['primary_key']     = [];
+        $this->migrationParts['engine']          = null;
         $this->migrationParts['drop_database']   = null;
         $this->migrationParts['create_database'] = null;
         $this->migrationParts['character_set']   = null;
@@ -665,15 +682,17 @@ class Migration
      */
     protected function compileIntegerDataType(string $name, ?int $size = null, bool $unsigned = false): string
     {
-        $integerDataType = $name.'(';
+        $integerDataType = $name;
         if (null !== $size) {
-            $integerDataType .= $size;
+            $integerDataType .= '('.$size;
             if ($unsigned) {
                 $integerDataType .= ' UNSIGNED';
             }
+
+            $integerDataType .= ')';
         }
 
-        return $integerDataType.')';
+        return $integerDataType;
     }
 
     /**
@@ -684,15 +703,17 @@ class Migration
      */
     protected function compileFloatDataType(string $name, ?int $size = null, ?int $digits  = null): string
     {
-        $floatDataType = $name.'(';
+        $floatDataType = $name;
         if (null !== $size) {
-            $floatDataType .= $size;
+            $floatDataType .= '('.$size;
             if (null !== $digits) {
                 $floatDataType .= ', '.$digits;
             }
+
+            $floatDataType .= ')';
         }
 
-        return $floatDataType.')';
+        return $floatDataType;
     }
 
     /**
@@ -703,6 +724,21 @@ class Migration
     protected function compileEnumerationDataType(string $name, array $values): string
     {
         return $name.'('.implode(', ', array_map(['static', 'compileValue'], $values)).')';
+    }
+
+    /**
+     * @param string   $name
+     * @param int|null $size
+     * @return string
+     */
+    protected function compileTimeDataType(string $name, ?int $size = null): string
+    {
+        $timeDataType = $name;
+        if (null !== $size) {
+            $timeDataType .= '('.$size.')';
+        }
+
+        return $timeDataType;
     }
 
     /**
@@ -760,6 +796,10 @@ class Migration
         }
 
         $sql .= ' ('.implode(', ', $columns).')';
+
+        if (null !== $this->parts['engine']) {
+            $sql .= ' ENGINE = '.$this->parts['engine'];
+        }
 
         return $sql.';';
     }
