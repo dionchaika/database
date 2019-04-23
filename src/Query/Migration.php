@@ -11,6 +11,9 @@
 
 namespace Dionchaika\Database\Query;
 
+use Dionchaika\Database\QueryException;
+use Dionchaika\Database\ConnectionInterface;
+
 class Migration
 {
     const TYPE_DROP_TABLE = 0;
@@ -48,6 +51,37 @@ class Migration
      * @var mixed[]
      */
     protected $columns = [];
+
+    /**
+     * @var \Dionchaika\Database\ConnectionInterface|null
+     */
+    protected $connection;
+
+    /**
+     * @var mixed[]
+     */
+    protected $parameters = [];
+
+    /**
+     * @var int
+     */
+    protected $parameterNumber = 0;
+
+    /**
+     * @param \Dionchaika\Database\ConnectionInterface|null $connection
+     */
+    public function __construct(?ConnectionInterface $connection = null)
+    {
+        $this->connection = $connection;
+    }
+
+    /**
+     * @return \Dionchaika\Database\ConnectionInterface|null
+     */
+    public function getConnection(): ?ConnectionInterface
+    {
+        return $this->connection;
+    }
 
     /**
      * @param mixed $tableName
@@ -641,6 +675,59 @@ class Migration
     public function __toString(): string
     {
         return $this->getSql();
+    }
+
+    /**
+     * @param mixed $value
+     * @return self
+     */
+    public function setParameter(&$value): self
+    {
+        $this->parameters[$this->parameterNumber] = $value;
+        ++$this->parameterNumber;
+
+        return $this;
+    }
+
+    /**
+     * @param int|string $parameter
+     * @param mixed      $value
+     * @return self
+     */
+    public function bindParameter($parameter, &$value): self
+    {
+        if (is_int($parameter)) {
+            $this->parameters[$parameter] = $value;
+        } else {
+            $this->parameters[':'.ltrim($parameter, ':')] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return \Dionchaika\Database\ConnectionInterface
+     * @throws \Dionchaika\Database\QueryException
+     */
+    public function migrate(): ConnectionInterface
+    {
+        if (null === $this->connection) {
+            throw new QueryException(
+                'Missing DB connection!'
+            );
+        }
+
+        if (empty($this->parameters)) {
+            $this->connection->query($this->getSql());
+        } else {
+            if (!$this->connection->isPrepared()) {
+                $this->connection->prepare($this->getSql());
+            }
+
+            $this->connection->execute($this->parameters);
+        }
+
+        return $this->connection;
     }
 
     /**

@@ -751,13 +751,14 @@ class Query
             );
         }
 
-        if (!$this->connection->isPrepared()) {
-            if (empty($this->parameters)) {
-                $this->connection->query($this->getSql());
-            } else {
+        if (empty($this->parameters)) {
+            $this->connection->query($this->getSql());
+        } else {
+            if (!$this->connection->isPrepared()) {
                 $this->connection->prepare($this->getSql());
-                $this->connection->execute($this->parameters);
             }
+
+            $this->connection->execute($this->parameters);
         }
 
         return $this->connection;
