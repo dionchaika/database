@@ -323,9 +323,9 @@ class Query
     }
 
     /**
-     * @param mixed  $columnName
-     * @param mixed[]  $values
-     * @param string $delimiter
+     * @param mixed   $columnName
+     * @param mixed[] $values
+     * @param string  $delimiter
      * @return self
      */
     public function whereIn($columnName, array $values, string $delimiter = 'AND'): self
@@ -342,7 +342,7 @@ class Query
     }
 
     /**
-     * @param mixed $columnName
+     * @param mixed   $columnName
      * @param mixed[] $values
      * @return self
      */
@@ -352,7 +352,7 @@ class Query
     }
 
     /**
-     * @param mixed $columnName
+     * @param mixed   $columnName
      * @param mixed[] $values
      * @return self
      */
