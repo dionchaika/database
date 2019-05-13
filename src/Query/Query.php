@@ -610,7 +610,7 @@ class Query
      */
     public function valuesRaw(string $expression): self
     {
-        $this->parts['values'][] = $expression;
+        $this->parts['values'] = $expression;
         return $this;
     }
 
@@ -658,7 +658,7 @@ class Query
      */
     public function setRaw(string $expression): self
     {
-        $this->parts['set'][] = $expression;
+        $this->parts['set'] = $expression;
         return $this;
     }
 
