@@ -110,7 +110,7 @@ class PDOConnection implements ConnectionInterface
         }
 
         try {
-            foreach ($params as $key => $value) {
+            foreach ($params as $key => &$value) {
                 $type = PDO::PARAM_STR;
                 if (is_int($value)) {
                     $type = PDO::PARAM_INT;

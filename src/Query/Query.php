@@ -137,10 +137,32 @@ class Query
      * @param mixed|null $aliasName
      * @return self
      */
+    public function selectMin($columnName = '*', $aliasName = null): self
+    {
+        $this->setType(self::TYPE_SELECT);
+        return $this->min($columnName, $aliasName);
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
     public function max($columnName = '*', $aliasName = null): self
     {
         $this->parts['select'][] = $this->compileAggregate('MAX', $columnName, $aliasName);
         return $this;
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
+    public function selectMax($columnName = '*', $aliasName = null): self
+    {
+        $this->setType(self::TYPE_SELECT);
+        return $this->max($columnName, $aliasName);
     }
 
     /**
@@ -159,6 +181,17 @@ class Query
      * @param mixed|null $aliasName
      * @return self
      */
+    public function selectAvg($columnName = '*', $aliasName = null): self
+    {
+        $this->setType(self::TYPE_SELECT);
+        return $this->avg($columnName, $aliasName);
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
     public function sum($columnName = '*', $aliasName = null): self
     {
         $this->parts['select'][] = $this->compileAggregate('SUM', $columnName, $aliasName);
@@ -170,10 +203,32 @@ class Query
      * @param mixed|null $aliasName
      * @return self
      */
+    public function selectSum($columnName = '*', $aliasName = null): self
+    {
+        $this->setType(self::TYPE_SELECT);
+        return $this->sum($columnName, $aliasName);
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
     public function count($columnName = '*', $aliasName = null): self
     {
         $this->parts['select'][] = $this->compileAggregate('COUNT', $columnName, $aliasName);
         return $this;
+    }
+
+    /**
+     * @param mixed      $columnName
+     * @param mixed|null $aliasName
+     * @return self
+     */
+    public function selectCount($columnName = '*', $aliasName = null): self
+    {
+        $this->setType(self::TYPE_SELECT);
+        return $this->count($columnName, $aliasName);
     }
 
     /**
