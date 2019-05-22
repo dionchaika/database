@@ -129,6 +129,8 @@ class MySQLiConnection implements ConnectionInterface
         if (false === $this->result) {
             throw new QueryException($this->mysqli->error);
         }
+
+        $this->prepared = false;
     }
 
     /**

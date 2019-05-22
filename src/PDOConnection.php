@@ -128,6 +128,7 @@ class PDOConnection implements ConnectionInterface
             }
 
             $this->stmt->execute();
+            $this->prepared = false;
         } catch (PDOException $e) {
             throw new QueryException($e->getMessage());
         }
