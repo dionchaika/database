@@ -824,9 +824,19 @@ class Query
      * @throws \Dionchaika\Database\QueryExceptionInterface
      * @throws \Dionchaika\Database\FetchExceptionInterface
      */
-    public function all(): array
+    public function get(): array
     {
         return $this->execute()->fetchAll();
+    }
+
+    /**
+     * @return mixed[]
+     * @throws \Dionchaika\Database\QueryExceptionInterface
+     * @throws \Dionchaika\Database\FetchExceptionInterface
+     */
+    public function all(): array
+    {
+        return $this->get();
     }
 
     /**
