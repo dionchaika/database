@@ -109,4 +109,62 @@ class Select
         $columnNames = is_array($columnNames) ? $columnNames : func_get_args();
         return $this->orderBy($columnNames, self::ORDER_DESC);
     }
+
+    /**
+     * Set the SELECT
+     * statement LIMIT clause.
+     *
+     * @param int      $count
+     * @param int|null $offset
+     * @return self
+     */
+    public function limit(int $count, ?int $offset = null): self
+    {
+        $this->parts['limit'] = (null === $offset) ? $count : $offset.', '.$count;
+        return $this;
+    }
+
+    /**
+     * Get the string
+     * representation of the SELECT statement.
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->toSQL();
+    }
+
+    /**
+     * Get the SELECT statement SQL.
+     *
+     * @return string
+     */
+    public function toSQL(): string
+    {
+        if (null === $this->parts['from']) {
+            return '';
+        }
+
+        if (empty($this->parts['select'])) {
+            $this->parts['select'][] = '*';
+        }
+
+        $sql = ($this->parts['distinct'] ? 'SELECT DISTINCT' : 'SELECT')
+            .' '.implode(', ', $this->parts['select']).' FROM '.$this->parts['from'];
+
+        if (!empty($this->parts['where'])) {
+            $sql .= ' WHERE '.implode(' ', $this->parts['where']);
+        }
+
+        if (!empty($this->parts['orderBy'])) {
+            $sql .= ' ORDER BY '.implode(', ', $this->parts['orderBy']);
+        }
+
+        if (null !== $this->parts['limit']) {
+            $sql .= ' LIMIT '.$this->parts['limit'];
+        }
+
+        return $sql.';';
+    }
 }
