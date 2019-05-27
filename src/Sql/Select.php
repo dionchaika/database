@@ -37,7 +37,7 @@ class Select
     }
 
     /**
-     * Make the select statement distinct.
+     * Make the SELECT statement distinct.
      *
      * @return self
      */
